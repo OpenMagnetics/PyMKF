@@ -40,35 +40,35 @@ message(STATUS ${MKF_DIR})
 include(FetchContent)
 
 FetchContent_Declare(json
-    GIT_REPOSITORY https://github.com/nlohmann/json/
+    GIT_REPOSITORY git@github.com:nlohmann/json.git
     GIT_TAG  tags/v3.11.2)
 FetchContent_MakeAvailable(json)
 include_directories("${CMAKE_BINARY_DIR}/_deps/json-src/include/nlohmann/")
 include_directories("${CMAKE_BINARY_DIR}/_deps/json-src/include/")
 
 FetchContent_Declare(pybind11
-        GIT_REPOSITORY https://github.com/pybind/pybind11.git)
+        GIT_REPOSITORY git@github.com:pybind/pybind11.git)
 
 FetchContent_Declare(pybind11_json
-        GIT_REPOSITORY https://github.com/pybind/pybind11_json.git)
+        GIT_REPOSITORY git@github.com:pybind/pybind11_json.git)
 
 FetchContent_MakeAvailable( pybind11 pybind11_json)
 include_directories("${CMAKE_BINARY_DIR}/_deps/pybind11-src/include/")
 include_directories("${CMAKE_BINARY_DIR}/_deps/pybind11_json-src/include/")
 
 FetchContent_Declare(spline
-    GIT_REPOSITORY https://github.com/AlfVII/spline.git)
+    GIT_REPOSITORY git@github.com:AlfVII/spline.git)
 FetchContent_MakeAvailable(spline)
 include_directories("${CMAKE_BINARY_DIR}/_deps/spline-src/src")
 
 FetchContent_Declare(magic-enum
-    GIT_REPOSITORY https://github.com/Neargye/magic_enum
+    GIT_REPOSITORY git@github.com:Neargye/magic_enum.git
     GIT_TAG  tags/v0.9.3)
 FetchContent_MakeAvailable(magic-enum)
 include_directories("${CMAKE_BINARY_DIR}/_deps/magic-enum-src/include")
 
 FetchContent_Declare(matplotplusplus
-    GIT_REPOSITORY https://github.com/alandefreitas/matplotplusplus
+    GIT_REPOSITORY git@github.com:alandefreitas/matplotplusplus.git
     GIT_TAG origin/master) # or whatever tag you want
 FetchContent_GetProperties(matplotplusplus)
 if(NOT matplotplusplus_POPULATED)
@@ -77,16 +77,16 @@ if(NOT matplotplusplus_POPULATED)
 endif()
 
 FetchContent_Declare(MKF
-        GIT_REPOSITORY https://github.com/OpenMagnetics/MKF.git
+        GIT_REPOSITORY git@github.com:OpenMagnetics/MKF.git
         GIT_TAG main)
 
 FetchContent_Declare(magic-enum
-        GIT_REPOSITORY https://github.com/Neargye/magic_enum
+        GIT_REPOSITORY git@github.com:Neargye/magic_enum.git
         GIT_TAG  tags/v0.9.3)
 
 FetchContent_Declare(
        mas
-       GIT_REPOSITORY https://github.com/OpenMagnetics/MAS.git
+       GIT_REPOSITORY git@github.com:OpenMagnetics/MAS.git
        GIT_TAG main
 )
 FetchContent_GetProperties(mas)
