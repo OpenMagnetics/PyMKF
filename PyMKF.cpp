@@ -198,7 +198,9 @@ json get_core_material_names_by_manufacturer(std::string manufacturerName) {
 
 json get_core_shape_names(bool includeToroidal) {
     try {
-        auto shapeNames = OpenMagnetics::get_shape_names(includeToroidal);
+        auto settings = OpenMagnetics::Settings::GetInstance();
+        settings->set_use_toroidal_cores(includeToroidal);
+        auto shapeNames = OpenMagnetics::get_shape_names();
         json result = json::array();
         for (auto elem : shapeNames) {
             result.push_back(elem);
@@ -431,7 +433,10 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
     try {
         std::vector<double> proportionPerWinding = proportionPerWindingJson;
         std::vector<size_t> pattern = patternJson;
-        auto coilFunctionalDescription = std::vector<OpenMagnetics::CoilFunctionalDescription>(coilJson["functionalDescription"]);
+        std::vector<OpenMagnetics::CoilFunctionalDescription> coilFunctionalDescription;
+        for (auto windingJson : coilJson["functionalDescription"]) {
+            coilFunctionalDescription.push_back(OpenMagnetics::CoilFunctionalDescription(windingJson));
+        }
         OpenMagnetics::CoilWrapper coil;
         if (coilJson.contains("_interleavingLevel")) {
             coil.set_interleaving_level(coilJson["_interleavingLevel"]);
