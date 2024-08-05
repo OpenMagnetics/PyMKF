@@ -30,6 +30,8 @@ endif()
 SET(MAS_DIRECTORY "${CMAKE_BINARY_DIR}/MAS/")
 SET(MAS_DIR "${CMAKE_BINARY_DIR}/_deps/mas-src/")
 SET(MKF_DIR "${CMAKE_BINARY_DIR}/_deps/mkf-src/")
+SET(FETCHCONTENT_QUIET FALSE)
+
 message(STATUS MAS_DIRECTORY)
 message(STATUS ${MAS_DIRECTORY})
 message(STATUS MAS_DIR)
@@ -39,36 +41,44 @@ message(STATUS ${MKF_DIR})
 
 include(FetchContent)
 
+message(STATUS "Fetching https://github.com/nlohmann/json.git")
 FetchContent_Declare(json
-    GIT_REPOSITORY git@github.com:nlohmann/json.git
-    GIT_TAG  tags/v3.11.2)
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG  tags/v3.11.2
+    GIT_PROGRESS TRUE
+    )
 FetchContent_MakeAvailable(json)
 include_directories("${CMAKE_BINARY_DIR}/_deps/json-src/include/nlohmann/")
 include_directories("${CMAKE_BINARY_DIR}/_deps/json-src/include/")
 
+message(STATUS "Fetching pybind11")
 FetchContent_Declare(pybind11
-        GIT_REPOSITORY git@github.com:pybind/pybind11.git)
+        GIT_REPOSITORY https://github.com/pybind/pybind11.git)
 
+message(STATUS "Fetching pybind11_json")
 FetchContent_Declare(pybind11_json
-        GIT_REPOSITORY git@github.com:pybind/pybind11_json.git)
+        GIT_REPOSITORY https://github.com/pybind/pybind11_json.git)
 
 FetchContent_MakeAvailable( pybind11 pybind11_json)
 include_directories("${CMAKE_BINARY_DIR}/_deps/pybind11-src/include/")
 include_directories("${CMAKE_BINARY_DIR}/_deps/pybind11_json-src/include/")
 
+message(STATUS "Fetching spline")
 FetchContent_Declare(spline
-    GIT_REPOSITORY git@github.com:AlfVII/spline.git)
+    GIT_REPOSITORY https://github.com/AlfVII/spline.git)
 FetchContent_MakeAvailable(spline)
 include_directories("${CMAKE_BINARY_DIR}/_deps/spline-src/src")
 
+message(STATUS "Fetching magic-enum")
 FetchContent_Declare(magic-enum
-    GIT_REPOSITORY git@github.com:Neargye/magic_enum.git
+    GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
     GIT_TAG  tags/v0.9.3)
 FetchContent_MakeAvailable(magic-enum)
 include_directories("${CMAKE_BINARY_DIR}/_deps/magic-enum-src/include")
 
+message(STATUS "Fetching matplotplusplus")
 FetchContent_Declare(matplotplusplus
-    GIT_REPOSITORY git@github.com:alandefreitas/matplotplusplus.git
+    GIT_REPOSITORY https://github.com/alandefreitas/matplotplusplus.git
     GIT_TAG origin/master) # or whatever tag you want
 FetchContent_GetProperties(matplotplusplus)
 if(NOT matplotplusplus_POPULATED)
@@ -76,30 +86,40 @@ if(NOT matplotplusplus_POPULATED)
     add_subdirectory(${matplotplusplus_SOURCE_DIR} ${matplotplusplus_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+message(STATUS "Fetching MKF")
 FetchContent_Declare(MKF
-        GIT_REPOSITORY git@github.com:OpenMagnetics/MKF.git
+        GIT_REPOSITORY https://github.com/OpenMagnetics/MKF.git
         GIT_TAG main)
 
+message(STATUS "Fetching magic-enum")
 FetchContent_Declare(magic-enum
-        GIT_REPOSITORY git@github.com:Neargye/magic_enum.git
+        GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
         GIT_TAG  tags/v0.9.3)
 
+message(STATUS "Fetching mas")
 FetchContent_Declare(
        mas
-       GIT_REPOSITORY git@github.com:OpenMagnetics/MAS.git
+       GIT_REPOSITORY https://github.com/OpenMagnetics/MAS.git
        GIT_TAG main
 )
+
+message(STATUS "Fetching Properties mas")
 FetchContent_GetProperties(mas)
+message(STATUS "Fetching Properties MKF")
 FetchContent_GetProperties(MKF)
 message(STATUS ${MAS_POPULATED})
 if(NOT MAS_POPULATED)
-  FetchContent_Populate(mas)
+    message(STATUS "Populating MKF")
+    FetchContent_Populate(mas)
 endif()
 message(STATUS ${MKF_POPULATED})
 if(NOT MKF_POPULATED)
-  FetchContent_Populate(MKF)
+    message(STATUS "Populating MKF")
+    FetchContent_Populate(MKF)
 endif()
 message(STATUS ${MAS_SOURCE_DIR})
+
+message(STATUS "Compiling MAS")
 
 add_custom_command(
   OUTPUT "${MAS_DIRECTORY}/MAS.hpp"
@@ -110,6 +130,7 @@ add_custom_target(PyMASGeneration
                   /bin/echo "RUNNING PyMASGeneration"
                   DEPENDS "${MAS_DIRECTORY}/MAS.hpp")
 
+message(STATUS "Compilinf PyMKF")
 file(GLOB SOURCES PyMKF.cpp ${CMAKE_BINARY_DIR}/_deps/mkf-src/src/*.cpp)
 message(STATUS SOURCES)
 message(STATUS ${SOURCES})

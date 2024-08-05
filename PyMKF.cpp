@@ -5,8 +5,10 @@
 #include <magic_enum.hpp>
 #include "json.hpp"
 
+#include "BobbinWrapper.h"
 #include "CoreWrapper.h"
 #include "CoilWrapper.h"
+#include "InitialPermeability.h"
 #include "InputsWrapper.h"
 #include <MAS.hpp>
 #include "Defaults.h"
@@ -16,6 +18,7 @@
 #include "MagnetizingInductance.h"
 #include "CoreLosses.h"
 #include "MagneticSimulator.h"
+#include "Resistivity.h"
 #include "CoreTemperature.h"
 #include "Utils.h"
 #include "Settings.h"
@@ -56,6 +59,48 @@ json get_core_materials() {
         return exception;
     }
 }
+
+double get_material_permeability(json materialName, double temperature, double magneticFieldDcBias, double frequency) {
+    try {
+        auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
+        OpenMagnetics::InitialPermeability initialPermeability;
+
+        return initialPermeability.get_initial_permeability(materialData, temperature, magneticFieldDcBias, frequency);
+    }
+    catch (const std::exception &exc) {
+        json exception;
+        exception["data"] = "Exception: " + std::string{exc.what()};
+        return exception;
+    }
+}
+
+double get_material_resistivity(json materialName, double temperature) {
+    try {
+        auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
+        auto resistivityModel = OpenMagnetics::ResistivityModel::factory(OpenMagnetics::ResistivityModels::CORE_MATERIAL);
+        return (*resistivityModel).get_resistivity(materialData, temperature);
+    }
+    catch (const std::exception &exc) {
+        json exception;
+        exception["data"] = "Exception: " + std::string{exc.what()};
+        return exception;
+    }
+}
+
+json get_core_material_steinmetz_coefficients(json materialName, double frequency) {
+    try {
+        auto steinmetzCoreLossesMethodRangeDatum = OpenMagnetics::CoreLossesModel::get_steinmetz_coefficients(materialName, frequency);
+        json result;
+        to_json(result, steinmetzCoreLossesMethodRangeDatum);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        json exception;
+        exception["data"] = "Exception: " + std::string{exc.what()};
+        return exception;
+    }
+}
+
 json get_core_shapes() {
     try {
         auto shapes = OpenMagnetics::get_shapes(true);
@@ -361,6 +406,23 @@ json find_wire_material_by_name(json wireMaterialName) {
         return exception;
     }
 }
+
+json create_basic_bobbin(json coreDataJson, bool nullDimensions){
+    try {
+        OpenMagnetics::CoreWrapper core(coreDataJson, false, false, false);
+        auto bobbin = OpenMagnetics::BobbinWrapper::create_quick_bobbin(core, nullDimensions);
+
+        json result;
+        to_json(result, bobbin);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        json exception;
+        exception["data"] = "Exception: " + std::string{exc.what()};
+        return exception;
+    }
+}
+
 
 json calculate_core_data(json coreDataJson, bool includeMaterialData){
     try {
@@ -944,6 +1006,9 @@ void reset_settings() {
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
     m.def("get_core_materials", &get_core_materials, "");
+    m.def("get_material_permeability", &get_material_permeability, "");
+    m.def("get_material_resistivity", &get_material_resistivity, "");
+    m.def("get_core_material_steinmetz_coefficients", &get_core_material_steinmetz_coefficients, "");
     m.def("get_core_shapes", &get_core_shapes, "");
     m.def("get_core_shape_families", &get_core_shape_families, "");
     m.def("get_wires", &get_wires, "");
@@ -963,6 +1028,7 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("find_bobbin_by_name", &find_bobbin_by_name, "");
     m.def("find_insulation_material_by_name", &find_insulation_material_by_name, "");
     m.def("find_wire_material_by_name", &find_wire_material_by_name, "");
+    m.def("create_basic_bobbin", &create_basic_bobbin, "");
     m.def("calculate_core_data", &calculate_core_data, "");
     m.def("calculate_core_processed_description", &calculate_core_processed_description, "");
     m.def("calculate_core_geometrical_description", &calculate_core_geometrical_description, "");
