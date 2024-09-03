@@ -8,6 +8,7 @@
 #include "BobbinWrapper.h"
 #include "CoreWrapper.h"
 #include "CoilWrapper.h"
+#include "WireWrapper.h"
 #include "InitialPermeability.h"
 #include "InputsWrapper.h"
 #include <MAS.hpp>
@@ -924,6 +925,53 @@ std::string plot_field(json magneticJson, json operatingPointJson, std::string o
     }
 }
 
+std::string plot_wire(json wireJson, std::string outFile, std::string cci_coords_path) {
+    try {
+        auto settings = OpenMagnetics::Settings::GetInstance();
+        OpenMagnetics::WireWrapper wire(wireJson);
+        OpenMagnetics::Painter painter(outFile);
+        painter.paint_wire(wire);
+        painter.export_svg();
+        return outFile;
+    }
+    catch(const std::runtime_error& re)
+    {
+        return re.what();
+    }
+    catch(const std::exception& ex)
+    {
+        return ex.what();
+    }
+    catch(...)
+    {
+        return "Unknown failure occurred. Possible memory corruption";
+    }
+}
+
+std::string plot_current_density(json wireJson, json operatingPointJson, std::string outFile) {
+    try {
+        auto settings = OpenMagnetics::Settings::GetInstance();
+        OpenMagnetics::WireWrapper wire(wireJson);
+        OpenMagnetics::OperatingPoint operatingPoint(operatingPointJson);
+        OpenMagnetics::Painter painter(outFile);
+        painter.paint_wire_with_current_density(wire, operatingPoint);
+        painter.export_svg();
+        return outFile;
+    }
+    catch(const std::runtime_error& re)
+    {
+        return re.what();
+    }
+    catch(const std::exception& ex)
+    {
+        return ex.what();
+    }
+    catch(...)
+    {
+        return "Unknown failure occurred. Possible memory corruption";
+    }
+}
+
 json get_settings() {
     try {
         auto settings = OpenMagnetics::Settings::GetInstance();
@@ -956,6 +1004,9 @@ json get_settings() {
         settingsJson["magneticFieldNumberPointsY"] = settings->get_magnetic_field_number_points_y();
         settingsJson["magneticFieldIncludeFringing"] = settings->get_magnetic_field_include_fringing();
         settingsJson["magneticFieldMirroringDimension"] = settings->get_magnetic_field_mirroring_dimension();
+        settingsJson["painterSimpleLitz"] = settings->get_painter_simple_litz();
+        settingsJson["painterAdvancedLitz"] = settings->get_painter_advanced_litz();
+        settingsJson["painterCciCoordinatesPath"] = settings->get_painter_cci_coordinates_path();
         return settingsJson;
     }
     catch (const std::exception &exc) {
@@ -995,6 +1046,9 @@ void set_settings(json settingsJson) {
     settings->set_magnetic_field_number_points_y(settingsJson["magneticFieldNumberPointsY"]);
     settings->set_magnetic_field_include_fringing(settingsJson["magneticFieldIncludeFringing"]);
     settings->set_magnetic_field_mirroring_dimension(settingsJson["magneticFieldMirroringDimension"]);
+    settings->set_painter_simple_litz(settingsJson["painterSimpleLitz"]);
+    settings->set_painter_advanced_litz(settingsJson["painterAdvancedLitz"]);
+    settings->set_painter_cci_coordinates_path(settingsJson["painterCciCoordinatesPath"]);
 }
 
 void reset_settings() {
@@ -1050,6 +1104,8 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("plot_layers", &plot_layers, "");
     m.def("plot_turns", &plot_turns, "");
     m.def("plot_field", &plot_field, "");
+    m.def("plot_wire", &plot_wire, "");
+    m.def("plot_current_density", &plot_current_density, "");
     m.def("set_settings", &set_settings, "");
     m.def("get_settings", &get_settings, "");
     m.def("reset_settings", &reset_settings, "");
