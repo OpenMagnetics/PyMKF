@@ -839,21 +839,30 @@ json calculate_skin_effect_losses_per_meter(json wireJson, json currentJson, dou
     }
 }
 
-bool plot_core(json magneticJson, std::string outFile) {
+std::string plot_core(json magneticJson, std::string outFile) {
     try {
         OpenMagnetics::MagneticWrapper magnetic(magneticJson);
         OpenMagnetics::Painter painter(outFile);
         painter.paint_core(magnetic);
         painter.paint_bobbin(magnetic);
         painter.export_svg();
-        return true;
+        return outFile;
     }
-    catch (...) {
-        return false;
+    catch(const std::runtime_error& re)
+    {
+        return re.what();
+    }
+    catch(const std::exception& ex)
+    {
+        return ex.what();
+    }
+    catch(...)
+    {
+        return "Unknown failure occurred. Possible memory corruption";
     }
 }
 
-bool plot_sections(json magneticJson, std::string outFile) {
+std::string plot_sections(json magneticJson, std::string outFile) {
     try {
         OpenMagnetics::MagneticWrapper magnetic(magneticJson);
         OpenMagnetics::Painter painter(outFile);
@@ -861,14 +870,23 @@ bool plot_sections(json magneticJson, std::string outFile) {
         painter.paint_bobbin(magnetic);
         painter.paint_coil_sections(magnetic);
         painter.export_svg();
-        return true;
+        return outFile;
     }
-    catch (...) {
-        return false;
+    catch(const std::runtime_error& re)
+    {
+        return re.what();
+    }
+    catch(const std::exception& ex)
+    {
+        return ex.what();
+    }
+    catch(...)
+    {
+        return "Unknown failure occurred. Possible memory corruption";
     }
 }
 
-bool plot_layers(json magneticJson, std::string outFile) {
+std::string plot_layers(json magneticJson, std::string outFile) {
     try {
         OpenMagnetics::MagneticWrapper magnetic(magneticJson);
         OpenMagnetics::Painter painter(outFile);
@@ -876,14 +894,23 @@ bool plot_layers(json magneticJson, std::string outFile) {
         painter.paint_bobbin(magnetic);
         painter.paint_coil_layers(magnetic);
         painter.export_svg();
-        return true;
+        return outFile;
     }
-    catch (...) {
-        return false;
+    catch(const std::runtime_error& re)
+    {
+        return re.what();
+    }
+    catch(const std::exception& ex)
+    {
+        return ex.what();
+    }
+    catch(...)
+    {
+        return "Unknown failure occurred. Possible memory corruption";
     }
 }
 
-bool plot_turns(json magneticJson, std::string outFile) {
+std::string plot_turns(json magneticJson, std::string outFile) {
     try {
         OpenMagnetics::MagneticWrapper magnetic(magneticJson);
         OpenMagnetics::Painter painter(outFile);
@@ -891,10 +918,19 @@ bool plot_turns(json magneticJson, std::string outFile) {
         painter.paint_bobbin(magnetic);
         painter.paint_coil_turns(magnetic);
         painter.export_svg();
-        return true;
+        return outFile;
     }
-    catch (...) {
-        return false;
+    catch(const std::runtime_error& re)
+    {
+        return re.what();
+    }
+    catch(const std::exception& ex)
+    {
+        return ex.what();
+    }
+    catch(...)
+    {
+        return "Unknown failure occurred. Possible memory corruption";
     }
 }
 
