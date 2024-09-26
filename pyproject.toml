@@ -4,7 +4,20 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "PyMKF"
-version = "0.9"
+version = "0.9.1"
+requires-python = ">=3.8"
 
 [tool.scikit-build]
 build-dir = "build/{wheel_tag}"
+
+[tool.cibuildwheel]
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-i686-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+manylinux-ppc64le-image = "manylinux_2_28"
+manylinux-s390x-image = "manylinux_2_28"
+manylinux-pypy_x86_64-image = "manylinux_2_28"
+manylinux-pypy_i686-image = "manylinux_2_28"
+manylinux-pypy_aarch64-image = "manylinux_2_28"
+build-verbosity = 1
+before-all = "dnf module install -y nodejs:20 && npm --version && npm install -g quicktype@23.0.170"

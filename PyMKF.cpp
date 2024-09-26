@@ -1030,6 +1030,8 @@ json get_settings() {
         if (settings->get_painter_minimum_value_colorbar()) {
             settingsJson["painterMinimumValueColorbar"] = settings->get_painter_minimum_value_colorbar();
         }
+        settingsJson["painterColorLines"] = settings->get_painter_color_lines();
+        settingsJson["painterColorText"] = settings->get_painter_color_text();
         settingsJson["painterColorFerrite"] = settings->get_painter_color_ferrite();
         settingsJson["painterColorBobbin"] = settings->get_painter_color_bobbin();
         settingsJson["painterColorCopper"] = settings->get_painter_color_copper();
@@ -1072,6 +1074,8 @@ void set_settings(json settingsJson) {
     if (settingsJson.contains("painterMinimumValueColorbar")) {
         settings->set_painter_minimum_value_colorbar(settingsJson["painterMinimumValueColorbar"]);
     }
+    settings->set_painter_color_lines(settingsJson["painterColorLines"]);
+    settings->set_painter_color_text(settingsJson["painterColorText"]);
     settings->set_painter_color_ferrite(settingsJson["painterColorFerrite"]);
     settings->set_painter_color_bobbin(settingsJson["painterColorBobbin"]);
     settings->set_painter_color_copper(settingsJson["painterColorCopper"]);
