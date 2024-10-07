@@ -1,7 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "pybind11_json/pybind11_json.hpp"
-#include <pybind11/embed.h>
 #include <magic_enum.hpp>
 #include "json.hpp"
 
