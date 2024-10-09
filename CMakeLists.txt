@@ -44,7 +44,7 @@ include(FetchContent)
 message(STATUS "Fetching https://github.com/nlohmann/json.git")
 FetchContent_Declare(json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG  tags/v3.11.2
+    GIT_TAG  tags/v3.11.3
     GIT_PROGRESS TRUE
     )
 FetchContent_MakeAvailable(json)

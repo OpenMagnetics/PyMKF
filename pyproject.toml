@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "PyMKF"
-version = "0.9.3"
+version = "0.9.9"
 requires-python = ">=3.8"
 authors = [
   { name="Alfonso Martinez", email="Alfonso_VII@hotmail.com" },
@@ -27,10 +27,10 @@ Contact = "https://www.linkedin.com/in/alfonso-martinez-de-la-torre/"
 
 [tool.scikit-build]
 build-dir = "build/{wheel_tag}"
-build.tool-args = ["-j8"]
+# build.tool-args = ["-j8"]
 
 [tool.cibuildwheel]
-skip=["pp*"]
+skip=["pp*", "*-win32"]
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
 manylinux-ppc64le-image = "manylinux_2_28"
@@ -44,4 +44,5 @@ before-all = "dnf module install -y nodejs:20 && npm --version && npm install -g
 archs = ["x86_64"]
 
 [tool.cibuildwheel.windows]
-before-all = "npm --version && npm install -g quicktype@23.0.170"
+before-all = "rmdir /S /Q build && npm --version && npm install -g quicktype@23.0.170"
+archs = ["AMD64"]
