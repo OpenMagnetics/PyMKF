@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "PyMKF"
-version = "0.9.9"
+version = "0.9.10"
 requires-python = ">=3.8"
 authors = [
   { name="Alfonso Martinez", email="Alfonso_VII@hotmail.com" },
@@ -30,7 +30,7 @@ build-dir = "build/{wheel_tag}"
 # build.tool-args = ["-j8"]
 
 [tool.cibuildwheel]
-skip=["pp*", "*-win32"]
+skip=["pp*", "*-win32", "*mul*"]
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
 manylinux-ppc64le-image = "manylinux_2_28"

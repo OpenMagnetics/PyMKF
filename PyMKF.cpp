@@ -493,7 +493,7 @@ json get_default_models() {
         auto coreTemperatureModelName = magic_enum::enum_name(OpenMagnetics::Defaults().coreTemperatureModelDefault);
         models["coreTemperature"] = coreTemperatureModelName;
 
-        return models.dump();
+        return models;
     }
     catch (const std::exception &exc) {
         json exception;
@@ -531,7 +531,7 @@ json calculate_advised_cores(json inputsJson, json weightsJson, int maximumNumbe
         }
         settings->reset();
 
-        return results.dump(4);
+        return results;
     }
     catch (const std::exception &exc) {
         json exception;
@@ -554,7 +554,7 @@ json calculate_advised_magnetics(json inputsJson, int maximumNumberResults){
             results.push_back(aux);
         }
 
-        return results.dump(4);
+        return results;
     }
     catch (const std::exception &exc) {
         json exception;
@@ -937,7 +937,7 @@ json calculate_harmonics(json waveformJson, double frequency) {
 
     json result;
     to_json(result, harmonics);
-    return result.dump(4);
+    return result;
 }
 
 json calculate_processed(json harmonicsJson, json waveformJson) {
@@ -950,7 +950,7 @@ json calculate_processed(json harmonicsJson, json waveformJson) {
 
     json result;
     to_json(result, processed);
-    return result.dump(4);
+    return result;
 }
 
 json calculate_shape_data(json shapeJson){
@@ -976,7 +976,7 @@ json calculate_shape_data(json shapeJson){
 
     json result;
     to_json(result, core);
-    return result.dump(4);
+    return result;
 }
 
 json calculate_core_data(json coreDataJson, bool includeMaterialData){
@@ -985,7 +985,7 @@ json calculate_core_data(json coreDataJson, bool includeMaterialData){
 
         json result;
         to_json(result, core);
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -1012,7 +1012,7 @@ json calculate_bobbin_data(json magneticJson){
 
         json result;
         to_json(result, bobbin);
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -1024,14 +1024,14 @@ json get_wire_data(json coilFunctionalDescriptionDataJson){
     auto wire = OpenMagnetics::CoilWrapper::resolve_wire(coilFunctionalDescription);
     json result;
     to_json(result, wire);
-    return result.dump(4);
+    return result;
 }
 
 json get_wire_data_by_name(std::string name){
     auto wireData = OpenMagnetics::find_wire_by_name(name);
     json result;
     to_json(result, wireData);
-    return result.dump(4);
+    return result;
 }
 
 json get_wire_data_by_standard_name(std::string standardName){
@@ -1052,14 +1052,14 @@ json get_wire_data_by_standard_name(std::string standardName){
             if (coating->get_grade().value() == 1) {
                 json result;
                 to_json(result, wire);
-                return result.dump(4);
+                return result;
             }
         }
     }
 
     json result;
     result["errorMessage"] = "Wire not found by standard name";
-    return result.dump(4);
+    return result;
 }
 
 double get_wire_outer_width_rectangular(double conductingWidth, int grade, json wireStandardJson){
@@ -1131,13 +1131,13 @@ json get_strand_by_standard_name(std::string standardName){
         if (wire.get_standard_name().value() == standardName && coating->get_grade().value() == 1) {
             json result;
             to_json(result, wire);
-            return result.dump(4);
+            return result;
         }
     }
 
     json result;
     result["errorMessage"] = "Wire not found by standard name";
-    return result.dump(4);
+    return result;
 }
 
 double get_wire_conducting_diameter_by_standard_name(std::string standardName){
@@ -1164,7 +1164,7 @@ json get_equivalent_wire(json oldWireJson, json newWireTypeJson, double effectiv
 
         json result;
         to_json(result, newWire);
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         std::cout << std::string{exc.what()} << std::endl;
@@ -1210,7 +1210,7 @@ json get_wire_coating_by_label(std::string label){
     }
     json result;
     to_json(result, insulationWireCoating);
-    return result.dump(4);
+    return result;
 }
 
 std::vector<std::string> get_coating_labels_by_type(json wireTypeJson){
@@ -1237,7 +1237,7 @@ json load_core_data(json coresJson){
         to_json(aux, core);
         result.push_back(aux);
     }
-    return result.dump(4);
+    return result;
 }
 
 json get_material_data(std::string materialName){
@@ -1245,7 +1245,7 @@ json get_material_data(std::string materialName){
     auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
     json result;
     to_json(result, materialData);
-    return result.dump(4);
+    return result;
 }
 
 json get_core_temperature_dependant_parameters(json coreData, double temperature){
@@ -1261,7 +1261,7 @@ json get_core_temperature_dependant_parameters(json coreData, double temperature
     result["permeance"] = 1.0 / reluctanceModel->get_ungapped_core_reluctance(core);
     result["resistivity"] = core.get_resistivity(temperature);
 
-    return result.dump(4);
+    return result;
 }
 
 json get_shape_data(std::string shapeName){
@@ -1270,7 +1270,7 @@ json get_shape_data(std::string shapeName){
 
         json result;
         to_json(result, shapeData);
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -1378,7 +1378,7 @@ json calculate_gap_reluctance(json coreGapData, std::string modelNameJson){
     auto coreGapResult = reluctanceModel->get_gap_reluctance(coreGap);
     json result;
     to_json(result, coreGapResult);
-    return result.dump(4);
+    return result;
 }
 
 json get_gap_reluctance_model_information(){
@@ -1387,7 +1387,7 @@ json get_gap_reluctance_model_information(){
     info["errors"] = OpenMagnetics::ReluctanceModel::get_models_errors();
     info["internal_links"] = OpenMagnetics::ReluctanceModel::get_models_internal_links();
     info["external_links"] = OpenMagnetics::ReluctanceModel::get_models_external_links();
-    return info.dump(4);
+    return info;
 }
 
 double calculate_inductance_from_number_turns_and_gapping(json coreData,
@@ -1473,7 +1473,7 @@ std::string calculate_gapping_from_number_turns_and_inductance(json coreData,
 
     json result;
     to_json(result, core);
-    return result.dump(4);
+    return result;
 }
 
 json calculate_core_losses(json coreData,
@@ -1541,7 +1541,7 @@ json calculate_core_losses(json coreData,
         result["maximumCoreTemperatureRise"] = coreLossesOutput.get_temperature().value() - operatingPoint.get_conditions().get_ambient_temperature();
     }
 
-    return result.dump(4);
+    return result;
 }
 
 json get_core_losses_model_information(json material){
@@ -1551,7 +1551,7 @@ json get_core_losses_model_information(json material){
     info["internal_links"] = OpenMagnetics::CoreLossesModel::get_models_internal_links();
     info["external_links"] = OpenMagnetics::CoreLossesModel::get_models_external_links();
     info["available_models"] = OpenMagnetics::CoreLossesModel::get_methods_string(material);
-    return info.dump(4);
+    return info;
 }
 
 json get_core_temperature_model_information(){
@@ -1560,7 +1560,7 @@ json get_core_temperature_model_information(){
     info["errors"] = OpenMagnetics::CoreTemperatureModel::get_models_errors();
     info["internal_links"] = OpenMagnetics::CoreTemperatureModel::get_models_internal_links();
     info["external_links"] = OpenMagnetics::CoreTemperatureModel::get_models_external_links();
-    return info.dump(4);
+    return info;
 }
 
 json calculate_induced_voltage(json excitationJson, double magnetizingInductance){
@@ -1570,7 +1570,7 @@ json calculate_induced_voltage(json excitationJson, double magnetizingInductance
 
     json result;
     to_json(result, voltage);
-    return result.dump(4);
+    return result;
 }
 
 json calculate_induced_current(json excitationJson, double magnetizingInductance){
@@ -1590,7 +1590,7 @@ json calculate_induced_current(json excitationJson, double magnetizingInductance
 
     json result;
     to_json(result, current);
-    return result.dump(4);
+    return result;
 }
 
 json calculate_reflected_secondary(json primaryExcitationJson, double turnRatio){
@@ -1616,7 +1616,7 @@ json calculate_reflected_secondary(json primaryExcitationJson, double turnRatio)
 
     json result;
     to_json(result, excitationOfThisWinding);
-    return result.dump(4);
+    return result;
 }
 
 json calculate_reflected_primary(json secondaryExcitationJson, double turnRatio){
@@ -1639,7 +1639,7 @@ json calculate_reflected_primary(json secondaryExcitationJson, double turnRatio)
 
     json result;
     to_json(result, excitationOfThisWinding);
-    return result.dump(4);
+    return result;
 }
 
 double calculate_instantaneous_power(json excitationJson){
@@ -1696,7 +1696,7 @@ json calculate_basic_processed_data(json waveformJson) {
     auto processed = OpenMagnetics::InputsWrapper::calculate_basic_processed_data(waveform);
     json result;
     to_json(result, processed);
-    return result.dump(4);
+    return result;
 }
 
 json create_waveform(json processedJson, double frequency) {
@@ -1704,7 +1704,7 @@ json create_waveform(json processedJson, double frequency) {
     auto waveform = OpenMagnetics::InputsWrapper::create_waveform(processed, frequency);
     json result;
     to_json(result, waveform);
-    return result.dump(4);
+    return result;
 }
 
 json scale_waveform_time_to_frequency(json waveformJson, double newFrequency) {
@@ -1712,7 +1712,7 @@ json scale_waveform_time_to_frequency(json waveformJson, double newFrequency) {
     auto scaledWaveform = OpenMagnetics::InputsWrapper::scale_time_to_frequency(waveform, newFrequency);
     json result;
     to_json(result, scaledWaveform);
-    return result.dump(4);
+    return result;
 }
 
 json calculate_insulation(json inputsJson){
@@ -1739,7 +1739,7 @@ json calculate_insulation(json inputsJson){
     {
         result["errorMessage"] = "Unknown failure occurred. Possible memory corruption";
     }
-    return result.dump(4);
+    return result;
 }
 
 json extract_operating_point(json fileJson, size_t numberWindings, double frequency, double desiredMagnetizingInductance, json mapColumnNamesJson){
@@ -1750,7 +1750,7 @@ json extract_operating_point(json fileJson, size_t numberWindings, double freque
         operatingPoint = OpenMagnetics::InputsWrapper::process_operating_point(operatingPoint, desiredMagnetizingInductance);
         json result;
         to_json(result, operatingPoint);
-        return result.dump(4);
+        return result;
     }
     catch(...)
     {
@@ -1770,7 +1770,7 @@ json extract_map_column_names(json fileJson, size_t numberWindings, double frequ
         }
         result.push_back(aux);
     }
-    return result.dump(4);
+    return result;
 }
 
 json extract_column_names(json fileJson){
@@ -1781,7 +1781,7 @@ json extract_column_names(json fileJson){
     for (auto& columnName : columnNames) {
         result.push_back(columnName);
     }
-    return result.dump(4);
+    return result;
 }
 
 std::vector<int> calculate_number_turns(int numberTurnsPrimary, json designRequirementsJson){
@@ -2012,7 +2012,7 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
 
         json result;
         to_json(result, coil);
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         std::cout << coilJson << std::endl;
@@ -2077,7 +2077,7 @@ json wind_by_sections(json coilJson, size_t repetitions, json proportionPerWindi
 
         json result;
         to_json(result, coil);
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -2121,7 +2121,7 @@ json wind_by_layers(json coilJson) {
 
         json result;
         to_json(result, coil);
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -2170,7 +2170,7 @@ json wind_by_turns(json coilJson) {
 
         json result;
         to_json(result, coil);
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -2225,7 +2225,7 @@ json delimit_and_compact(json coilJson) {
 
         json result;
         to_json(result, coil);
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -2242,7 +2242,7 @@ json get_layers_by_winding_index(json coilJson, int windingIndex){
             to_json(aux, layer);
             result.push_back(aux);
         }
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -2258,7 +2258,7 @@ json get_layers_by_section(json coilJson, json sectionName){
             to_json(aux, layer);
             result.push_back(aux);
         }
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -2274,7 +2274,7 @@ json get_sections_description_conduction(json coilJson){
             to_json(aux, section);
             result.push_back(aux);
         }
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -2300,7 +2300,7 @@ json add_margin_to_section_by_index(json coilJson, int sectionIndex, double top_
 
         json result;
         to_json(result, coil);
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
@@ -2347,7 +2347,7 @@ json simulate(json inputsJson,
         json result;
         to_json(result, mas);
 
-        return result.dump(4);
+        return result;
     }
     catch (const std::exception &exc) {
         return "Exception: " + std::string{exc.what()};
