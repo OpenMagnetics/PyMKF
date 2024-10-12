@@ -2089,8 +2089,19 @@ json wind_by_sections(json coilJson, size_t repetitions, json proportionPerWindi
     }
 }
 
-json wind_by_layers(json coilJson) {
+json wind_by_layers(json coilJson, json insulationLayersJson) {
     try {
+        std::map<std::pair<size_t, size_t>, std::vector<OpenMagnetics::Layer>> insulationLayers;
+
+        for (auto [key, layersJson] : insulationLayersJson.items()) {
+            auto keys = OpenMagnetics::split(key, ",");
+            std::pair<size_t, size_t> windingsMapKey(stoi(keys[0]), stoi(keys[1]));
+            std::vector<OpenMagnetics::Layer> layers;
+            for (auto layerJson : layersJson) {
+                layers.push_back(OpenMagnetics::Layer(layerJson));
+            }
+            insulationLayers[windingsMapKey] = layers;
+        }
 
         std::vector<OpenMagnetics::CoilFunctionalDescription> coilFunctionalDescription;
         for (auto elem : coilJson["functionalDescription"]) {
@@ -2102,6 +2113,11 @@ json wind_by_layers(json coilJson) {
             coilSectionsDescription.push_back(OpenMagnetics::Section(elem));
         }
         OpenMagnetics::CoilWrapper coil;
+
+
+        if (insulationLayers.size() > 0) {
+            coil.set_insulation_layers(insulationLayers);
+        }
 
         if (coilJson.contains("_interleavingLevel")) {
             coil.set_interleaving_level(coilJson["_interleavingLevel"]);
@@ -2359,7 +2375,6 @@ json simulate(json inputsJson,
     }
 }
 
-
 bool check_if_fits(json bobbinJson, double dimension, bool isHorizontalOrRadial) {
     try {
         OpenMagnetics::BobbinWrapper bobbin(bobbinJson);
@@ -2489,7 +2504,6 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("get_available_winding_orientations", &get_available_winding_orientations, "");
     m.def("get_available_coil_alignments", &get_available_coil_alignments, "");
     m.def("check_requirement", &check_requirement, "");
-    m.def("wind", &wind, "");
     m.def("wind_by_sections", &wind_by_sections, "");
     m.def("wind_by_layers", &wind_by_layers, "");
     m.def("wind_by_turns", &wind_by_turns, "");
