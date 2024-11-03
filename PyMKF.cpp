@@ -29,10 +29,11 @@
 #include "MagneticSimulator.h"
 #include "WindingOhmicLosses.h"
 #include "WindingSkinEffectLosses.h"
-
+#include "CircuitSimulatorInterface.h"
 
 
 using json = nlohmann::json;
+using ordered_json = nlohmann::ordered_json;
 
 
 #define STRINGIFY(x) #x
@@ -1745,7 +1746,7 @@ json calculate_insulation(json inputsJson){
 json extract_operating_point(json fileJson, size_t numberWindings, double frequency, double desiredMagnetizingInductance, json mapColumnNamesJson){
     try {
         std::vector<std::map<std::string, std::string>> mapColumnNames = mapColumnNamesJson.get<std::vector<std::map<std::string, std::string>>>();
-        auto reader = OpenMagnetics::InputsWrapper::CircuitSimulationReader(fileJson);
+        auto reader = OpenMagnetics::CircuitSimulationReader(fileJson);
         auto operatingPoint = reader.extract_operating_point(numberWindings, frequency, mapColumnNames);
         operatingPoint = OpenMagnetics::InputsWrapper::process_operating_point(operatingPoint, desiredMagnetizingInductance);
         json result;
@@ -1759,7 +1760,7 @@ json extract_operating_point(json fileJson, size_t numberWindings, double freque
 }
 
 json extract_map_column_names(json fileJson, size_t numberWindings, double frequency){
-    auto reader = OpenMagnetics::InputsWrapper::CircuitSimulationReader(fileJson);
+    auto reader = OpenMagnetics::CircuitSimulationReader(fileJson);
     auto columnNames = reader.extract_map_column_names(numberWindings, frequency);
 
     json result = json::array();
@@ -1774,7 +1775,7 @@ json extract_map_column_names(json fileJson, size_t numberWindings, double frequ
 }
 
 json extract_column_names(json fileJson){
-    auto reader = OpenMagnetics::InputsWrapper::CircuitSimulationReader(fileJson);
+    auto reader = OpenMagnetics::CircuitSimulationReader(fileJson);
     auto columnNames = reader.extract_column_names();
 
     json result = json::array();
@@ -2387,6 +2388,20 @@ bool check_if_fits(json bobbinJson, double dimension, bool isHorizontalOrRadial)
 }
 
 
+ordered_json export_magnetic_as_subcircuit(json magneticJson) {
+    try {
+        OpenMagnetics::MagneticWrapper magnetic(magneticJson);
+
+        ordered_json subcircuit = OpenMagnetics::CircuitSimulatorExporter().export_magnetic_as_subcircuit(magnetic);
+
+        return subcircuit.dump(4);
+    }
+    catch (const std::exception &exc) {
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
+
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
     m.def("get_core_materials", &get_core_materials, "");
@@ -2515,4 +2530,5 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("are_sections_and_layers_fitting", &are_sections_and_layers_fitting, "");
     m.def("add_margin_to_section_by_index", &add_margin_to_section_by_index, "");
     m.def("check_if_fits", &check_if_fits, "");
+    m.def("export_magnetic_as_subcircuit", &export_magnetic_as_subcircuit, "");
 }
