@@ -7,6 +7,7 @@ option(BUILD_TESTS      "Build tests"    OFF)
 option(BUILD_EXAMPLES   "Build examples" OFF)
 option(UTPP_INCLUDE_TESTS_IN_BUILD   "Build tests" OFF)
 option(INCLUDE_MKF_TESTS      "Build tests"    OFF)
+option(HAVE_LAPACK   "HAVE_LAPACK" 0)
 
 set(CMAKE_CXX_STANDARD 23) 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -40,6 +41,14 @@ message(STATUS MKF_DIR)
 message(STATUS ${MKF_DIR})
 
 include(FetchContent)
+
+message("Using for Levmar: ${CMAKE_BINARY_DIR}/_deps/levmar-2.6")
+file(DOWNLOAD https://users.ics.forth.gr/~lourakis/levmar/levmar-2.6.tgz ${CMAKE_BINARY_DIR}/_deps/levmar-2.6.tgz SHOW_PROGRESS)
+execute_process(COMMAND ${CMAKE_COMMAND} -E tar -xzvf ${CMAKE_BINARY_DIR}/_deps/levmar-2.6.tgz)
+execute_process(COMMAND ${CMAKE_COMMAND} -E rename levmar-2.6 ${CMAKE_BINARY_DIR}/_deps/levmar-2.6)
+execute_process(COMMAND ${CMAKE_COMMAND} -E rename levmar-2.6 ${CMAKE_BINARY_DIR}/_deps/levmar-2.6)
+add_subdirectory("${CMAKE_BINARY_DIR}/_deps/levmar-2.6" "${CMAKE_BINARY_DIR}/_deps/levmar-2.6")
+include_directories("${CMAKE_BINARY_DIR}/_deps/levmar-2.6")
 
 message(STATUS "Fetching https://github.com/nlohmann/json.git")
 FetchContent_Declare(json
@@ -140,9 +149,8 @@ add_dependencies(PyMKF PyMASGeneration)
 
 FetchContent_MakeAvailable(magic-enum)
 
-
-target_link_libraries(PyMKF PUBLIC nlohmann_json::nlohmann_json matplot)
-
+target_link_libraries(PyMKF PUBLIC nlohmann_json::nlohmann_json matplot levmar)
+ADD_DEPENDENCIES(PyMKF levmar)
 
 file(DOWNLOAD "https://raw.githubusercontent.com/vector-of-bool/cmrc/master/CMakeRC.cmake"
                  "${CMAKE_BINARY_DIR}/CMakeRC.cmake")

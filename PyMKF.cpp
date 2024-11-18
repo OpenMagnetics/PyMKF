@@ -20,6 +20,7 @@
 #include "MagneticSimulator.h"
 #include "Resistivity.h"
 #include "CoreTemperature.h"
+#include "CircuitSimulatorInterface.h"
 #include "Utils.h"
 #include "Settings.h"
 #include "MagneticAdviser.h"
@@ -1745,7 +1746,7 @@ json calculate_insulation(json inputsJson){
 json extract_operating_point(json fileJson, size_t numberWindings, double frequency, double desiredMagnetizingInductance, json mapColumnNamesJson){
     try {
         std::vector<std::map<std::string, std::string>> mapColumnNames = mapColumnNamesJson.get<std::vector<std::map<std::string, std::string>>>();
-        auto reader = OpenMagnetics::InputsWrapper::CircuitSimulationReader(fileJson);
+        auto reader = OpenMagnetics::CircuitSimulationReader(fileJson);
         auto operatingPoint = reader.extract_operating_point(numberWindings, frequency, mapColumnNames);
         operatingPoint = OpenMagnetics::InputsWrapper::process_operating_point(operatingPoint, desiredMagnetizingInductance);
         json result;
@@ -1759,7 +1760,7 @@ json extract_operating_point(json fileJson, size_t numberWindings, double freque
 }
 
 json extract_map_column_names(json fileJson, size_t numberWindings, double frequency){
-    auto reader = OpenMagnetics::InputsWrapper::CircuitSimulationReader(fileJson);
+    auto reader = OpenMagnetics::CircuitSimulationReader(fileJson);
     auto columnNames = reader.extract_map_column_names(numberWindings, frequency);
 
     json result = json::array();
@@ -1774,7 +1775,7 @@ json extract_map_column_names(json fileJson, size_t numberWindings, double frequ
 }
 
 json extract_column_names(json fileJson){
-    auto reader = OpenMagnetics::InputsWrapper::CircuitSimulationReader(fileJson);
+    auto reader = OpenMagnetics::CircuitSimulationReader(fileJson);
     auto columnNames = reader.extract_column_names();
 
     json result = json::array();
@@ -2386,6 +2387,56 @@ bool check_if_fits(json bobbinJson, double dimension, bool isHorizontalOrRadial)
     }
 }
 
+double get_coating_thickness(json wireJson){
+    try {
+        OpenMagnetics::WireWrapper wire(wireJson);
+        return wire.get_coating_thickness();
+    }
+    catch (const std::exception &exc) {
+        std::cout << std::string{exc.what()}  << std::endl;
+        return -1;
+    }
+}
+
+double get_coating_relative_permittivity(json wireJson){
+    try {
+        OpenMagnetics::WireWrapper wire(wireJson);
+        return wire.get_coating_relative_permittivity();
+    }
+    catch (const std::exception &exc) {
+        std::cout << std::string{exc.what()}  << std::endl;
+        return -1;
+    }
+}
+
+json get_coating_insulation_material(json wireJson){
+    try {
+        OpenMagnetics::WireWrapper wire(wireJson);
+        auto material = wire.resolve_coating_insulation_material();
+
+        json result;
+        to_json(result, material);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
+json get_insulation_layer_insulation_material(json coilJson, std::string layerName){
+    try {
+        OpenMagnetics::CoilWrapper coil(coilJson);
+        auto material = OpenMagnetics::CoilWrapper::resolve_insulation_layer_insulation_material(coil, layerName);
+
+        json result;
+        to_json(result, material);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
 
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
@@ -2515,4 +2566,8 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("are_sections_and_layers_fitting", &are_sections_and_layers_fitting, "");
     m.def("add_margin_to_section_by_index", &add_margin_to_section_by_index, "");
     m.def("check_if_fits", &check_if_fits, "");
+    m.def("get_coating_thickness", &get_coating_thickness, "");
+    m.def("get_coating_relative_permittivity", &get_coating_relative_permittivity, "");
+    m.def("get_coating_insulation_material", &get_coating_insulation_material, "");
+    m.def("get_insulation_layer_insulation_material", &get_insulation_layer_insulation_material, "");
 }
