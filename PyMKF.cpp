@@ -30,10 +30,11 @@
 #include "MagneticSimulator.h"
 #include "WindingOhmicLosses.h"
 #include "WindingSkinEffectLosses.h"
-
+#include "CircuitSimulatorInterface.h"
 
 
 using json = nlohmann::json;
+using ordered_json = nlohmann::ordered_json;
 
 
 #define STRINGIFY(x) #x
@@ -2438,6 +2439,20 @@ json get_insulation_layer_insulation_material(json coilJson, std::string layerNa
 }
 
 
+ordered_json export_magnetic_as_subcircuit(json magneticJson) {
+    try {
+        OpenMagnetics::MagneticWrapper magnetic(magneticJson);
+
+        ordered_json subcircuit = OpenMagnetics::CircuitSimulatorExporter().export_magnetic_as_subcircuit(magnetic);
+
+        return subcircuit.dump(4);
+    }
+    catch (const std::exception &exc) {
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
+
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
     m.def("get_core_materials", &get_core_materials, "");
@@ -2570,4 +2585,5 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("get_coating_relative_permittivity", &get_coating_relative_permittivity, "");
     m.def("get_coating_insulation_material", &get_coating_insulation_material, "");
     m.def("get_insulation_layer_insulation_material", &get_insulation_layer_insulation_material, "");
+    m.def("export_magnetic_as_subcircuit", &export_magnetic_as_subcircuit, "");
 }
