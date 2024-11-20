@@ -48,7 +48,64 @@ py::dict get_constants() {
     constantsMap["residualGap"] = constants.residualGap;
     constantsMap["minimumNonResidualGap"] = constants.minimumNonResidualGap;
     constantsMap["vacuumPermeability"] = constants.vacuumPermeability;
+    constantsMap["vacuumPermittivity"] = constants.vacuumPermittivity;
+    constantsMap["magneticFluxDensitySaturation"] = constants.magneticFluxDensitySaturation;
+    constantsMap["spacerProtudingPercentage"] = constants.spacerProtudingPercentage;
+    constantsMap["coilPainterScale"] = constants.coilPainterScale;
+    constantsMap["minimumDistributedFringingFactor"] = constants.minimumDistributedFringingFactor;
+    constantsMap["maximumDistributedFringingFactor"] = constants.maximumDistributedFringingFactor;
+    constantsMap["initialGapLengthForSearching"] = constants.initialGapLengthForSearching;
+    constantsMap["roshenMagneticFieldStrengthStep"] = constants.roshenMagneticFieldStrengthStep;
+    constantsMap["foilToSectionMargin"] = constants.foilToSectionMargin;
+    constantsMap["planarToSectionMargin"] = constants.planarToSectionMargin;
+
     return constantsMap;
+}
+
+
+py::dict get_defaults() {
+    auto defaults = OpenMagnetics::Defaults();
+    py::dict defaultsMap;
+    json aux;
+    to_json(aux, defaults.coreLossesModelDefault);
+    to_json(aux, defaults.coreLossesModelDefault);
+    defaultsMap["coreLossesModelDefault"] = aux;
+    to_json(aux, defaults.coreTemperatureModelDefault);
+    defaultsMap["coreTemperatureModelDefault"] = aux;
+    to_json(aux, defaults.reluctanceModelDefault);
+    defaultsMap["reluctanceModelDefault"] = aux;
+    to_json(aux, defaults.magneticFieldStrengthModelDefault);
+    defaultsMap["magneticFieldStrengthModelDefault"] = aux;
+    to_json(aux, defaults.magneticFieldStrengthFringingEffectModelDefault);
+    defaultsMap["magneticFieldStrengthFringingEffectModelDefault"] = aux;
+    defaultsMap["maximumProportionMagneticFluxDensitySaturation"] = defaults.maximumProportionMagneticFluxDensitySaturation;
+    defaultsMap["coreAdviserFrequencyReference"] = defaults.coreAdviserFrequencyReference;
+    defaultsMap["coreAdviserMagneticFluxDensityReference"] = defaults.coreAdviserMagneticFluxDensityReference;
+    defaultsMap["coreAdviserThresholdValidity"] = defaults.coreAdviserThresholdValidity;
+    defaultsMap["coreAdviserMaximumCoreTemperature"] = defaults.coreAdviserMaximumCoreTemperature;
+    defaultsMap["coreAdviserMaximumPercentagePowerCoreLosses"] = defaults.coreAdviserMaximumPercentagePowerCoreLosses;
+    defaultsMap["coreAdviserMaximumMagneticsAfterFiltering"] = defaults.coreAdviserMaximumMagneticsAfterFiltering;
+    defaultsMap["coreAdviserMaximumNumberStacks"] = defaults.coreAdviserMaximumNumberStacks;
+    defaultsMap["maximumCurrentDensity"] = defaults.maximumCurrentDensity;
+    defaultsMap["maximumEffectiveCurrentDensity"] = defaults.maximumEffectiveCurrentDensity;
+    defaultsMap["maximumNumberParallels"] = defaults.maximumNumberParallels;
+    defaultsMap["magneticFluxDensitySaturation"] = defaults.magneticFluxDensitySaturation;
+    defaultsMap["magnetizingInductanceThresholdValidity"] = defaults.magnetizingInductanceThresholdValidity;
+    defaultsMap["harmonicAmplitudeThreshold"] = defaults.harmonicAmplitudeThreshold;
+    defaultsMap["ambientTemperature"] = defaults.ambientTemperature;
+    defaultsMap["measurementFrequency"] = defaults.measurementFrequency;
+    defaultsMap["magneticFieldMirroringDimension"] = defaults.magneticFieldMirroringDimension;
+    defaultsMap["maximumCoilPattern"] = defaults.maximumCoilPattern;
+    to_json(aux, defaults.defaultSectionsOrientation);
+    defaultsMap["defaultSectionsOrientation"] = aux;
+    defaultsMap["defaultEnamelledInsulationMaterial"] = defaults.defaultEnamelledInsulationMaterial;
+    defaultsMap["defaultInsulationMaterial"] = defaults.defaultInsulationMaterial;
+    defaultsMap["defaultLayerInsulationMaterial"] = defaults.defaultLayerInsulationMaterial;
+    defaultsMap["overlappingFactorSurroundingTurns"] = defaults.overlappingFactorSurroundingTurns;
+    to_json(aux, defaults.commonWireStandard);
+    defaultsMap["commonWireStandard"] = aux;
+
+    return defaultsMap;
 }
 
 json get_core_materials() {
@@ -2413,7 +2470,16 @@ double get_coating_relative_permittivity(json wireJson){
 json get_coating_insulation_material(json wireJson){
     try {
         OpenMagnetics::WireWrapper wire(wireJson);
-        auto material = wire.resolve_coating_insulation_material();
+        OpenMagnetics::InsulationMaterialWrapper material;
+
+        try {
+            material = wire.resolve_coating_insulation_material();
+        }
+        catch (const std::exception &e) {
+            if (std::string{e.what()} == "Coating is missing material information") {
+                material = OpenMagnetics::find_insulation_material_by_name(OpenMagnetics::Defaults().defaultEnamelledInsulationMaterial);
+            }
+        }
 
         json result;
         to_json(result, material);
@@ -2455,6 +2521,7 @@ ordered_json export_magnetic_as_subcircuit(json magneticJson) {
 
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
+    m.def("get_defaults", &get_defaults, "");
     m.def("get_core_materials", &get_core_materials, "");
     m.def("get_material_permeability", &get_material_permeability, "");
     m.def("get_material_resistivity", &get_material_resistivity, "");
