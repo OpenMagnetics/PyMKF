@@ -1,0 +1,71 @@
+/* Custom styles for PyMKF documentation */
+
+/* Improve code block visibility */
+.highlight {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+[data-md-color-scheme="slate"] .highlight {
+    background-color: #2b2b2b;
+}
+
+/* Enhance table readability */
+.md-typeset table:not([class]) {
+    font-size: .85rem;
+}
+
+.md-typeset table:not([class]) td,
+.md-typeset table:not([class]) th {
+    padding: 0.5em 1em;
+}
+
+/* Improve admonition visibility */
+.md-typeset .admonition,
+.md-typeset details {
+    font-size: .85rem;
+}
+
+/* Better header spacing */
+.md-typeset h1 {
+    margin-bottom: 1.5em;
+}
+
+.md-typeset h2 {
+    margin-top: 1.5em;
+}
+
+/* Enhance API documentation readability */
+.doc-contents {
+    padding: 1em;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+[data-md-color-scheme="slate"] .doc-contents {
+    background-color: #2b2b2b;
+}
+
+/* Better navigation visibility */
+.md-nav__item .md-nav__link--active {
+    font-weight: bold;
+}
+
+/* Improve code annotation styling */
+.annotate {
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.85em;
+}
+
+/* Better spacing for lists */
+.md-typeset ul li,
+.md-typeset ol li {
+    margin-bottom: .25em;
+}
+
+/* Enhance blockquote styling */
+.md-typeset blockquote {
+    border-left: 4px solid var(--md-primary-fg-color);
+    padding-left: 1em;
+}

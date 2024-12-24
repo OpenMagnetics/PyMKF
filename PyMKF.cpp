@@ -42,6 +42,29 @@ using ordered_json = nlohmann::ordered_json;
 
 namespace py = pybind11;
 
+
+/**
+ * @brief Retrieves a dictionary of constant values used in the OpenMagnetics library.
+ * 
+ * This function creates a dictionary (py::dict) and populates it with various constant values 
+ * from the OpenMagnetics::Constants class. These constants include physical constants, 
+ * magnetic properties, and other parameters used in magnetic field calculations.
+ * 
+ * @return py::dict A dictionary containing the following key-value pairs:
+ * - "residualGap": The residual gap value.
+ * - "minimumNonResidualGap": The minimum non-residual gap value.
+ * - "vacuumPermeability": The permeability of vacuum.
+ * - "vacuumPermittivity": The permittivity of vacuum.
+ * - "magneticFluxDensitySaturation": The saturation magnetic flux density.
+ * - "spacerProtudingPercentage": The percentage of spacer protruding.
+ * - "coilPainterScale": The scale factor for coil painting.
+ * - "minimumDistributedFringingFactor": The minimum distributed fringing factor.
+ * - "maximumDistributedFringingFactor": The maximum distributed fringing factor.
+ * - "initialGapLengthForSearching": The initial gap length for searching.
+ * - "roshenMagneticFieldStrengthStep": The step size for Roshen magnetic field strength.
+ * - "foilToSectionMargin": The margin between foil and section.
+ * - "planarToSectionMargin": The margin between planar and section.
+ */
 py::dict get_constants() {
     auto constants = OpenMagnetics::Constants();
     py::dict constantsMap;
@@ -63,6 +86,16 @@ py::dict get_constants() {
 }
 
 
+/**
+ * @brief Retrieves the default configuration values as a Python dictionary.
+ *
+ * This function creates an instance of the OpenMagnetics::Defaults class and converts its
+ * properties to a Python dictionary using the pybind11 library. The dictionary contains
+ * various default settings related to core losses, temperature models, magnetic field
+ * strength, and other parameters used in the OpenMagnetics framework.
+ *
+ * @return py::dict A dictionary containing the default configuration values.
+ */
 py::dict get_defaults() {
     auto defaults = OpenMagnetics::Defaults();
     py::dict defaultsMap;
@@ -108,6 +141,16 @@ py::dict get_defaults() {
     return defaultsMap;
 }
 
+/**
+ * @brief Retrieves a list of core materials.
+ * 
+ * This function calls the OpenMagnetics::get_materials function to obtain a list of core materials.
+ * It then converts each material to a JSON object and adds it to a JSON array.
+ * If an exception occurs during this process, it catches the exception and returns a JSON object
+ * containing the exception message.
+ * 
+ * @return json A JSON array of core materials or a JSON object containing an exception message.
+ */
 json get_core_materials() {
     try {
         auto materials = OpenMagnetics::get_materials(std::nullopt);
@@ -126,6 +169,19 @@ json get_core_materials() {
     }
 }
 
+/**
+ * @brief Retrieves the initial permeability of a given material based on specified conditions.
+ *
+ * This function finds the core material by its name and calculates its initial permeability
+ * based on the provided temperature, magnetic field DC bias, and frequency.
+ *
+ * @param materialName The name of the material in JSON format.
+ * @param temperature The temperature at which the permeability is to be calculated.
+ * @param magneticFieldDcBias The DC bias of the magnetic field.
+ * @param frequency The frequency at which the permeability is to be calculated.
+ * @return The initial permeability of the material as a double.
+ * @throws std::exception If an error occurs during the process, an exception is caught and its message is returned in JSON format.
+ */
 double get_material_permeability(json materialName, double temperature, double magneticFieldDcBias, double frequency) {
     try {
         auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
@@ -140,6 +196,17 @@ double get_material_permeability(json materialName, double temperature, double m
     }
 }
 
+/**
+ * @brief Retrieves the resistivity of a given material at a specified temperature.
+ *
+ * This function uses the OpenMagnetics library to find the core material by name and then
+ * calculates its resistivity at the given temperature using the appropriate resistivity model.
+ *
+ * @param materialName A JSON object containing the name of the material.
+ * @param temperature The temperature at which to calculate the resistivity.
+ * @return The resistivity of the material at the specified temperature.
+ * @throws std::exception If an error occurs while retrieving the material data or calculating resistivity.
+ */
 double get_material_resistivity(json materialName, double temperature) {
     try {
         auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
@@ -153,6 +220,18 @@ double get_material_resistivity(json materialName, double temperature) {
     }
 }
 
+/**
+ * @brief Retrieves the Steinmetz coefficients for a given core material at a specified frequency.
+ *
+ * This function calls the OpenMagnetics::CoreLossesModel::get_steinmetz_coefficients method to obtain
+ * the Steinmetz coefficients for the specified core material and frequency. The result is then converted
+ * to a JSON object and returned. If an exception occurs during the process, the exception message is
+ * caught and returned as a JSON object.
+ *
+ * @param materialName The name of the core material for which the Steinmetz coefficients are to be retrieved.
+ * @param frequency The frequency at which the Steinmetz coefficients are to be calculated.
+ * @return A JSON object containing the Steinmetz coefficients or an exception message if an error occurs.
+ */
 json get_core_material_steinmetz_coefficients(json materialName, double frequency) {
     try {
         auto steinmetzCoreLossesMethodRangeDatum = OpenMagnetics::CoreLossesModel::get_steinmetz_coefficients(materialName, frequency);
@@ -167,6 +246,15 @@ json get_core_material_steinmetz_coefficients(json materialName, double frequenc
     }
 }
 
+/**
+ * @brief Retrieves core shapes and converts them to JSON format.
+ *
+ * This function calls the OpenMagnetics::get_shapes function to obtain a list of core shapes.
+ * It then converts each shape to a JSON object and adds it to a JSON array.
+ * If an exception occurs during this process, the exception message is caught and returned in JSON format.
+ *
+ * @return A JSON array containing the core shapes, or a JSON object with an exception message if an error occurs.
+ */
 json get_core_shapes() {
     try {
         auto shapes = OpenMagnetics::get_shapes(true);
@@ -184,6 +272,17 @@ json get_core_shapes() {
         return exception;
     }
 }
+
+/**
+ * @brief Retrieves a list of unique core shape families.
+ *
+ * This function fetches all available core shapes using the OpenMagnetics library,
+ * extracts their families, and returns a JSON array of unique core shape families.
+ * If an exception occurs during the process, it catches the exception and returns
+ * a JSON object containing the exception message.
+ *
+ * @return json A JSON array of unique core shape families or a JSON object with an exception message.
+ */
 json get_core_shape_families() {
     try {
         auto shapes = OpenMagnetics::get_shapes(false);
@@ -206,6 +305,17 @@ json get_core_shape_families() {
         return exception;
     }
 }
+
+/**
+ * @brief Retrieves a list of wires and converts them to JSON format.
+ *
+ * This function calls the OpenMagnetics::get_wires() function to obtain a list of wires.
+ * It then converts each wire to a JSON object using the OpenMagnetics::to_json() function
+ * and stores them in a JSON array. If an exception occurs during this process, it catches
+ * the exception and returns a JSON object containing the exception message.
+ *
+ * @return A JSON array containing the wire data, or a JSON object with an exception message if an error occurs.
+ */
 json get_wires() {
     try {
         auto wires = OpenMagnetics::get_wires();
@@ -223,6 +333,17 @@ json get_wires() {
         return exception;
     }
 }
+
+/**
+ * @brief Retrieves a list of bobbins in JSON format.
+ *
+ * This function calls the OpenMagnetics::get_bobbins() function to get a list of bobbins,
+ * converts each bobbin to a JSON object using OpenMagnetics::to_json(), and returns the 
+ * list of JSON objects. If an exception occurs during the process, it catches the exception 
+ * and returns a JSON object containing the exception message.
+ *
+ * @return json A JSON array of bobbins or a JSON object with exception details.
+ */
 json get_bobbins() {
     try {
         auto bobbins = OpenMagnetics::get_bobbins();
@@ -240,6 +361,16 @@ json get_bobbins() {
         return exception;
     }
 }
+
+/**
+ * @brief Retrieves a list of insulation materials.
+ *
+ * This function calls the OpenMagnetics::get_insulation_materials() function to obtain a list of insulation materials.
+ * It then converts each material to a JSON object and adds it to a JSON array.
+ * If an exception occurs during this process, the exception message is caught and returned as a JSON object.
+ *
+ * @return A JSON array containing the insulation materials, or a JSON object with an exception message if an error occurs.
+ */
 json get_insulation_materials() {
     try {
         auto insulationMaterials = OpenMagnetics::get_insulation_materials();
@@ -257,6 +388,16 @@ json get_insulation_materials() {
         return exception;
     }
 }
+
+/**
+ * @brief Retrieves the wire materials and converts them to JSON format.
+ *
+ * This function calls the OpenMagnetics::get_wire_materials() function to obtain a list of wire materials.
+ * It then converts each wire material to a JSON object and adds it to a JSON array.
+ * If an exception occurs during this process, it catches the exception and returns a JSON object containing the exception message.
+ *
+ * @return A JSON array containing the wire materials, or a JSON object with an exception message if an error occurs.
+ */
 json get_wire_materials() {
     try {
         auto wireMaterials = OpenMagnetics::get_wire_materials();
@@ -275,6 +416,16 @@ json get_wire_materials() {
     }
 }
 
+/**
+ * @brief Retrieves the names of core materials.
+ * 
+ * This function calls the OpenMagnetics::get_material_names function to obtain a list of core material names.
+ * It then converts this list into a JSON array and returns it.
+ * 
+ * @return json A JSON array containing the names of core materials. If an exception occurs, a JSON object with the exception message is returned.
+ * 
+ * @throws std::exception If an error occurs while retrieving the material names.
+ */
 json get_core_material_names() {
     try {
         auto materialNames = OpenMagnetics::get_material_names(std::nullopt);
@@ -291,6 +442,17 @@ json get_core_material_names() {
     }
 }
 
+/**
+ * @brief Retrieves the core material names by manufacturer.
+ *
+ * This function fetches the core material names associated with a given manufacturer
+ * and returns them in a JSON array. If an exception occurs during the process, 
+ * it catches the exception and returns a JSON object containing the exception message.
+ *
+ * @param manufacturerName The name of the manufacturer whose core material names are to be retrieved.
+ * @return A JSON array containing the core material names. If an exception occurs, 
+ *         a JSON object with the exception message is returned.
+ */
 json get_core_material_names_by_manufacturer(std::string manufacturerName) {
     try {
         auto materialNames = OpenMagnetics::get_material_names(manufacturerName);
@@ -307,6 +469,16 @@ json get_core_material_names_by_manufacturer(std::string manufacturerName) {
     }
 }
 
+/**
+ * @brief Retrieves the names of core shapes.
+ *
+ * This function fetches the names of core shapes based on the specified settings.
+ * It can include or exclude toroidal cores based on the input parameter.
+ *
+ * @param includeToroidal A boolean flag indicating whether to include toroidal cores in the result.
+ * @return A JSON array containing the names of the core shapes. If an exception occurs, 
+ *         a JSON object with the exception message is returned.
+ */
 json get_core_shape_names(bool includeToroidal) {
     try {
         auto settings = OpenMagnetics::Settings::GetInstance();
@@ -325,6 +497,15 @@ json get_core_shape_names(bool includeToroidal) {
     }
 }
 
+/**
+ * @brief Retrieves the names of wires.
+ * 
+ * This function calls the OpenMagnetics::get_wire_names() function to obtain a list of wire names.
+ * It then converts this list into a JSON array and returns it.
+ * 
+ * @return json A JSON array containing the names of wires. If an exception occurs, a JSON object
+ *         with the exception message is returned.
+ */
 json get_wire_names() {
     try {
         auto wireNames = OpenMagnetics::get_wire_names();
@@ -341,6 +522,15 @@ json get_wire_names() {
     }
 }
 
+/**
+ * @brief Retrieves the names of bobbins.
+ *
+ * This function calls the OpenMagnetics::get_bobbin_names() function to get a list of bobbin names.
+ * It then converts this list into a JSON array and returns it.
+ *
+ * @return json A JSON array containing the names of bobbins. If an exception occurs, a JSON object
+ *         containing the exception message is returned.
+ */
 json get_bobbin_names() {
     try {
         auto bobbinNames = OpenMagnetics::get_bobbin_names();
@@ -357,6 +547,15 @@ json get_bobbin_names() {
     }
 }
 
+/**
+ * @brief Retrieves the names of insulation materials.
+ *
+ * This function calls the OpenMagnetics::get_insulation_material_names() function to get a list of insulation material names.
+ * It then converts the list into a JSON array and returns it.
+ * If an exception occurs during the process, it catches the exception and returns a JSON object containing the exception message.
+ *
+ * @return json A JSON array containing the names of insulation materials, or a JSON object with an exception message if an error occurs.
+ */
 json get_insulation_material_names() {
     try {
         auto insulationMaterialNames = OpenMagnetics::get_insulation_material_names();
@@ -373,6 +572,15 @@ json get_insulation_material_names() {
     }
 }
 
+/**
+ * @brief Retrieves the names of wire materials.
+ *
+ * This function calls the OpenMagnetics::get_wire_material_names() function to obtain a list of wire material names.
+ * It then converts this list into a JSON array and returns it.
+ * If an exception occurs during the process, it catches the exception and returns a JSON object containing the exception message.
+ *
+ * @return json A JSON array containing the names of wire materials, or a JSON object with an exception message if an error occurs.
+ */
 json get_wire_material_names() {
     try {
         auto wireMaterialNames = OpenMagnetics::get_wire_material_names();
@@ -389,6 +597,16 @@ json get_wire_material_names() {
     }
 }
 
+/**
+ * @brief Finds core material data by name.
+ *
+ * This function searches for core material data using the provided material name.
+ * It utilizes the OpenMagnetics library to perform the search and converts the
+ * resulting data to a JSON format.
+ *
+ * @param materialName A JSON object containing the name of the material to search for.
+ * @return A JSON object containing the core material data if found, or an exception message if an error occurs.
+ */
 json find_core_material_by_name(json materialName) {
     try {
         auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
@@ -403,6 +621,17 @@ json find_core_material_by_name(json materialName) {
     }
 }
 
+/**
+ * @brief Finds core shape data by name.
+ *
+ * This function attempts to find the core shape data corresponding to the given shape name.
+ * If successful, it converts the shape data to a JSON object and returns it.
+ * If an exception occurs during the process, it catches the exception and returns a JSON object
+ * containing the exception message.
+ *
+ * @param shapeName The name of the core shape to find.
+ * @return A JSON object containing the core shape data if found, or an exception message if an error occurs.
+ */
 json find_core_shape_by_name(json shapeName) {
     try {
         auto shapeData = OpenMagnetics::find_core_shape_by_name(shapeName);
@@ -417,6 +646,17 @@ json find_core_shape_by_name(json shapeName) {
     }
 }
 
+/**
+ * @brief Finds wire data by its name.
+ *
+ * This function searches for wire data using the provided wire name.
+ * If the wire is found, it returns the wire data in JSON format.
+ * If an exception occurs during the search, it catches the exception
+ * and returns a JSON object containing the exception message.
+ *
+ * @param wireName The name of the wire to search for, in JSON format.
+ * @return A JSON object containing the wire data if found, or an exception message if an error occurs.
+ */
 json find_wire_by_name(json wireName) {
     try {
         auto wireData = OpenMagnetics::find_wire_by_name(wireName);
@@ -431,6 +671,17 @@ json find_wire_by_name(json wireName) {
     }
 }
 
+/**
+ * @brief Finds bobbin data by its name.
+ *
+ * This function attempts to find the bobbin data corresponding to the given bobbin name.
+ * It uses the OpenMagnetics library to perform the search and converts the result to a JSON object.
+ * If an exception occurs during the search, it catches the exception and returns a JSON object
+ * containing the exception message.
+ *
+ * @param bobbinName The name of the bobbin to search for, provided as a JSON object.
+ * @return A JSON object containing the bobbin data if found, or an exception message if an error occurs.
+ */
 json find_bobbin_by_name(json bobbinName) {
     try {
         auto bobbinData = OpenMagnetics::find_bobbin_by_name(bobbinName);
@@ -2467,6 +2718,15 @@ double get_coating_relative_permittivity(json wireJson){
     }
 }
 
+/**
+ * @brief Retrieves the coating insulation material for a given wire.
+ *
+ * This function takes a JSON object representing a wire and attempts to resolve its coating insulation material.
+ * If the material information is missing, it defaults to a predefined enamelled insulation material.
+ *
+ * @param wireJson A JSON object containing the wire information.
+ * @return A JSON object representing the resolved insulation material. If an exception occurs, returns a JSON object with the exception message.
+ */
 json get_coating_insulation_material(json wireJson){
     try {
         OpenMagnetics::WireWrapper wire(wireJson);
@@ -2490,6 +2750,17 @@ json get_coating_insulation_material(json wireJson){
     }
 }
 
+/**
+ * @brief Retrieves the insulation material of a specified insulation layer from a coil JSON object.
+ *
+ * This function takes a JSON object representing a coil and a string specifying the name of an insulation layer.
+ * It returns the insulation material of the specified insulation layer in JSON format.
+ *
+ * @param coilJson A JSON object representing the coil.
+ * @param layerName A string specifying the name of the insulation layer.
+ * @return A JSON object representing the insulation material of the specified insulation layer.
+ *         If an exception occurs, a JSON object containing the exception message is returned.
+ */
 json get_insulation_layer_insulation_material(json coilJson, std::string layerName){
     try {
         OpenMagnetics::CoilWrapper coil(coilJson);
@@ -2504,7 +2775,17 @@ json get_insulation_layer_insulation_material(json coilJson, std::string layerNa
     }
 }
 
-
+/**
+ * @brief Exports a magnetic component as a subcircuit.
+ *
+ * This function takes a JSON representation of a magnetic component, wraps it using the 
+ * OpenMagnetics::MagneticWrapper, and then exports it as a subcircuit using the 
+ * OpenMagnetics::CircuitSimulatorExporter. The resulting subcircuit is returned as a 
+ * formatted JSON string.
+ *
+ * @param magneticJson A JSON object representing the magnetic component.
+ * @return A formatted JSON string representing the subcircuit, or an error message if an exception occurs.
+ */
 ordered_json export_magnetic_as_subcircuit(json magneticJson) {
     try {
         OpenMagnetics::MagneticWrapper magnetic(magneticJson);

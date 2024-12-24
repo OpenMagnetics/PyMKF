@@ -19,6 +19,15 @@ classifiers = [
   "Programming Language :: C++",
   "License :: OSI Approved :: MIT License",
 ]
+docs = [
+    "mkdocs>=1.4.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.20.0",
+    "mkdocs-git-revision-date-localized-plugin>=1.1.0",
+    "mkdocs-jupyter>=0.24.0",
+    "mike>=1.1.2",
+]
+
 
 [project.urls]
 Homepage = "https://openmagnetics.com"
@@ -47,3 +56,4 @@ archs = ["x86_64"]
 [tool.cibuildwheel.windows]
 before-all = "rmdir /S /Q build && npm --version && npm install -g quicktype@23.0.170"
 archs = ["AMD64"]
+
