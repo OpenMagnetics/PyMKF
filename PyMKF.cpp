@@ -2459,6 +2459,8 @@ json wind_by_layers(json coilJson, json insulationLayersJson) {
     }
 }
 
+
+
 json wind_by_turns(json coilJson) {
     try {
 
@@ -2508,6 +2510,29 @@ json wind_by_turns(json coilJson) {
     }
 }
 
+
+/**
+ * @brief Processes a JSON object representing a coil, compacts its data, and returns the result as a JSON object.
+ *
+ * This function takes a JSON object containing various descriptions of a coil, processes them into their respective
+ * data structures, and then compacts the coil data using the `delimit_and_compact` method of the `CoilWrapper` class.
+ * The resulting compacted coil data is then converted back to a JSON object and returned.
+ *
+ * @param coilJson The input JSON object containing the coil descriptions. It should have the following structure:
+ * - "functionalDescription": Array of functional descriptions for the coil.
+ * - "sectionsDescription": Array of section descriptions for the coil.
+ * - "layersDescription": Array of layer descriptions for the coil.
+ * - "turnsDescription": Array of turn descriptions for the coil.
+ * - "_interleavingLevel" (optional): Interleaving level of the coil.
+ * - "_windingOrientation" (optional): Winding orientation of the coil.
+ * - "_layersOrientation" (optional): Layers orientation of the coil.
+ * - "_turnsAlignment" (optional): Turns alignment of the coil.
+ * - "_sectionAlignment" (optional): Section alignment of the coil.
+ * - "bobbin": Bobbin description of the coil.
+ *
+ * @return A JSON object containing the compacted coil data. If an exception occurs during processing, a JSON object
+ * containing the exception message is returned.
+ */
 json delimit_and_compact(json coilJson) {
     try {
 
@@ -2527,7 +2552,6 @@ json delimit_and_compact(json coilJson) {
         for (auto elem : coilJson["turnsDescription"]) {
             coilTurnsDescription.push_back(OpenMagnetics::Turn(elem));
         }
-
 
         OpenMagnetics::CoilWrapper coil;
 
@@ -2563,6 +2587,18 @@ json delimit_and_compact(json coilJson) {
     }
 }
 
+
+/**
+ * @brief Retrieves the layers of a coil by the specified winding index.
+ * 
+ * This function takes a JSON representation of a coil and an integer winding index,
+ * and returns a JSON array containing the layers associated with the given winding index.
+ * 
+ * @param coilJson A JSON object representing the coil.
+ * @param windingIndex An integer specifying the winding index for which layers are to be retrieved.
+ * @return A JSON array containing the layers for the specified winding index. If an exception occurs,
+ *         a JSON string with the exception message is returned.
+ */
 json get_layers_by_winding_index(json coilJson, int windingIndex){
     try {
         OpenMagnetics::CoilWrapper coil(coilJson);
@@ -2580,6 +2616,17 @@ json get_layers_by_winding_index(json coilJson, int windingIndex){
     }
 }
 
+/**
+* @brief Retrieves the layers of a coil by its section name.
+*
+* This function takes a JSON object representing a coil and a section name, extracts the layers
+* of the coil that belong to the specified section, and returns them as a JSON array.
+*
+* @param coilJson A JSON object representing the coil.
+* @param sectionName The name of the section to which the layers belong.
+*
+* @return A JSON array containing the layers of the coil that belong to the specified section.
+ */
 json get_layers_by_section(json coilJson, json sectionName){
     try {
         json result = json::array();
@@ -2596,6 +2643,16 @@ json get_layers_by_section(json coilJson, json sectionName){
     }
 }
 
+/**
+ * @brief Retrieves the description of conduction sections from a coil JSON object.
+ *
+ * This function takes a JSON object representing a coil, extracts the conduction
+ * sections descriptions, and returns them as a JSON array.
+ *
+ * @param coilJson A JSON object representing the coil.
+ * @return A JSON array containing the descriptions of the conduction sections.
+ *         If an exception occurs, a JSON object with the exception message is returned.
+ */
 json get_sections_description_conduction(json coilJson){
     try {
         json result = json::array();
@@ -2612,6 +2669,18 @@ json get_sections_description_conduction(json coilJson){
     }
 }
 
+/**
+ * @brief Checks if the sections and layers of a coil fit according to the provided JSON configuration.
+ *
+ * This function takes a JSON object representing the coil configuration and checks if the sections
+ * and layers of the coil fit properly. It uses the OpenMagnetics::CoilWrapper class to perform the
+ * check.
+ *
+ * @param coilJson A JSON object containing the coil configuration.
+ * @return true if the sections and layers fit properly, false otherwise.
+ *
+ * @throws std::exception if there is an error during the fitting check.
+ */
 bool are_sections_and_layers_fitting(json coilJson) {
     try {
         json result = json::array();
@@ -2624,6 +2693,20 @@ bool are_sections_and_layers_fitting(json coilJson) {
     }
 }
 
+/**
+ * @brief Adds margin to a specific section of a coil by its index.
+ * 
+ * This function takes a JSON representation of a coil, adds margin to a specified section
+ * by its index, and returns the updated JSON representation of the coil.
+ * 
+ * @param coilJson The JSON object representing the coil.
+ * @param sectionIndex The index of the section to which the margin will be added.
+ * @param top_or_left_margin The margin to be added to the top or left side of the section.
+ * @param bottom_or_right_margin The margin to be added to the bottom or right side of the section.
+ * @return json The updated JSON object representing the coil with the added margin.
+ * 
+ * @throws std::exception If an error occurs during the margin addition process.
+ */
 json add_margin_to_section_by_index(json coilJson, int sectionIndex, double top_or_left_margin, double bottom_or_right_margin) {
     try {
         OpenMagnetics::CoilWrapper coil(coilJson);
@@ -2638,6 +2721,20 @@ json add_margin_to_section_by_index(json coilJson, int sectionIndex, double top_
     }
 }
 
+/**
+ * @brief Simulates the magnetic behavior based on the provided inputs, magnetic properties, and model data.
+ * 
+ * @param inputsJson A JSON object containing the input parameters for the simulation.
+ * @param magneticJson A JSON object containing the magnetic properties for the simulation.
+ * @param modelsData A JSON object containing the model names to be used for the simulation.
+ * @return json A JSON object containing the simulation results.
+ * 
+ * This function initializes the magnetic and input wrappers using the provided JSON data. It then sets the default
+ * models for reluctance, core losses, and core temperature. If specific models are provided in the modelsData JSON,
+ * those models are used instead of the defaults. The function then creates a MagneticSimulator object, sets the
+ * model names, and performs the simulation. The results are converted to JSON and returned. If an exception occurs,
+ * an error message is returned.
+ */
 json simulate(json inputsJson,
                      json magneticJson,
                      json modelsData){
@@ -2685,6 +2782,20 @@ json simulate(json inputsJson,
     }
 }
 
+/**
+ * @brief Checks if a given dimension fits within a bobbin.
+ * 
+ * This function takes a JSON representation of a bobbin, a dimension, and a flag indicating 
+ * whether the dimension is horizontal or radial. It then checks if the given dimension fits 
+ * within the bobbin.
+ * 
+ * @param bobbinJson A JSON object representing the bobbin.
+ * @param dimension The dimension to check.
+ * @param isHorizontalOrRadial A boolean flag indicating whether the dimension is horizontal or radial.
+ * @return true if the dimension fits within the bobbin, false otherwise.
+ * 
+ * @throws std::exception If there is an error during the check.
+ */
 bool check_if_fits(json bobbinJson, double dimension, bool isHorizontalOrRadial) {
     try {
         OpenMagnetics::BobbinWrapper bobbin(bobbinJson);
@@ -2696,6 +2807,16 @@ bool check_if_fits(json bobbinJson, double dimension, bool isHorizontalOrRadial)
     }
 }
 
+/**
+ * @brief Retrieves the coating thickness of a wire from a JSON object.
+ *
+ * This function creates a WireWrapper object using the provided JSON data and
+ * returns the coating thickness of the wire. If an exception occurs during the
+ * process, it catches the exception, prints the error message, and returns -1.
+ *
+ * @param wireJson A JSON object containing the wire data.
+ * @return The coating thickness of the wire. Returns -1 if an exception occurs.
+ */
 double get_coating_thickness(json wireJson){
     try {
         OpenMagnetics::WireWrapper wire(wireJson);
@@ -2707,6 +2828,17 @@ double get_coating_thickness(json wireJson){
     }
 }
 
+/**
+ * @brief Retrieves the relative permittivity of the coating from the given wire JSON object.
+ * 
+ * This function attempts to create a WireWrapper object from the provided JSON representation
+ * of a wire and then retrieves the relative permittivity of its coating. If an exception occurs
+ * during this process, the exception message is printed to the standard output and the function
+ * returns -1.
+ * 
+ * @param wireJson A JSON object representing the wire.
+ * @return double The relative permittivity of the wire's coating, or -1 if an error occurs.
+ */
 double get_coating_relative_permittivity(json wireJson){
     try {
         OpenMagnetics::WireWrapper wire(wireJson);

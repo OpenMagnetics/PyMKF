@@ -1,37 +1,7 @@
 # PyMKF Documentation
 
 Welcome to the PyMKF documentation. PyMKF is a Python wrapper for MKF module of OpenMagnetics
-
-## Features
-
-- Feature 1
-- Feature 2
-- Feature 3
-
-## Quick Start
-
-```python
-import pymkf
-```
-
-# Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
-## Installation
-refer to [Installation](installation.md)
-
-## Examples
-refer to [Examples](examples.md)
-
-
-
-I'll help create comprehensive documentation templates based on our previous mkdocs configuration. Here's the detailed documentation structure:
-
-1. First, let's create the main `index.md`:
-
-```markdown
-# PyMKF Documentation
-
-PyMKF (Python Magnetic Kernel Framework) is a Python library for designing and analyzing magnetic components. It provides a comprehensive set of tools for core selection, winding design, and magnetic performance analysis.
+PyMKF is a Python library for designing and analyzing magnetic components. It provides a comprehensive set of tools for core selection, winding design, and magnetic performance analysis.
 
 ## Features
 
@@ -69,30 +39,13 @@ core_losses = pymkf.calculate_core_losses(core_data, coil_data, inputs_data, mod
 ```
 
 ## Installation
-
+User installation is via pip https://pypi.org/project/PyMKF/
 ```bash
-pip install pymkf
-```
-
-For development installation:
-
-```bash
-git clone https://github.com/yourusername/PyMKF.git
-cd PyMKF
-pip install -e ".[dev]"
+pip install PyMKF
 ```
 
 ## Contributing
-
 Contributions are welcome! Please feel free to submit a Pull Request.
-```
-
-2. Create `installation.md`:
-
-```markdown
-# Installation Guide
-
-## Requirements
 
 ### Core Dependencies
 - Python >= 3.7
@@ -103,14 +56,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - CMake >= 3.15
 - C++ compiler with C++17 support
 - pybind11
-
-## Installation Methods
-
-### From PyPI (Recommended)
-
-```bash
-pip install pymkf
-```
 
 ### From Source
 
@@ -173,12 +118,7 @@ pip install pymkf
 3. Python Version Mismatch
    - Verify Python version compatibility
    - Check virtual environment settings
-```
 
-3. Create `api.md`:
-
-```markdown
-# API Reference
 
 ## Core Functions
 
@@ -285,33 +225,3 @@ create additional documentation sections for:
 3. Development setup
 4. Performance optimization tips
 5. Troubleshooting guide
-
-
-docs/
-├── docs/
-│   ├── index.md
-│   ├── installation.md
-│   ├── requirements.md
-│   ├── build.md
-│   ├── faq.md
-│   ├── user-guide/
-│   │   ├── core-selection.md
-│   │   ├── winding-design.md
-│   │   ├── thermal-analysis.md
-│   │   └── loss-calculations.md
-│   ├── api/
-│   │   ├── core.md
-│   │   ├── wire.md
-│   │   ├── design.md
-│   │   └── constants.md
-│   ├── examples/
-│   │   ├── basic-usage.md
-│   │   ├── advanced.md
-│   │   └── notebooks.md
-│   ├── development/
-│   │   ├── contributing.md
-│   │   ├── code-style.md
-│   │   └── testing.md
-│   └── css/
-│       └── custom.css
-└── mkdocs.yml
