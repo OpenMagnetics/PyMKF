@@ -1238,6 +1238,16 @@ void reset_settings() {
     settings->reset();
 }
 
+/**
+ * @brief Calculate the harmonics of a given waveform.
+ *
+ * This function takes a JSON representation of a waveform and a frequency, 
+ * then calculates the harmonics of the waveform.
+ *
+ * @param waveformJson A JSON object representing the waveform.
+ * @param frequency The frequency at which to sample the waveform.
+ * @return A JSON object containing the harmonics data.
+ */
 json calculate_harmonics(json waveformJson, double frequency) {
     OpenMagnetics::Waveform waveform;
     OpenMagnetics::from_json(waveformJson, waveform);
@@ -1250,6 +1260,18 @@ json calculate_harmonics(json waveformJson, double frequency) {
     return result;
 }
 
+/**
+ * @brief Calculate processed data from harmonics and waveform JSON inputs.
+ *
+ * This function takes JSON representations of harmonics and waveform data,
+ * converts them to their respective OpenMagnetics types, and then calculates
+ * the processed data using the OpenMagnetics::InputsWrapper::calculate_processed_data
+ * method. The result is then converted back to JSON and returned.
+ *
+ * @param harmonicsJson JSON object containing harmonics data.
+ * @param waveformJson JSON object containing waveform data.
+ * @return JSON object containing the processed data.
+ */
 json calculate_processed(json harmonicsJson, json waveformJson) {
     OpenMagnetics::Waveform waveform;
     OpenMagnetics::Harmonics harmonics;
@@ -1263,6 +1285,15 @@ json calculate_processed(json harmonicsJson, json waveformJson) {
     return result;
 }
 
+/**
+ * @brief Calculate shape data based on the provided JSON input.
+ *
+ * This function takes a JSON object representing the shape data, processes it using the OpenMagnetics library,
+ * and returns the processed data as a JSON object.
+ *
+ * @param shapeJson A JSON object containing the shape data.
+ * @return A JSON object containing the processed shape data.
+ */
 json calculate_shape_data(json shapeJson){
     OpenMagnetics::CoreShape shape(shapeJson);
     OpenMagnetics::CoreWrapper core;
@@ -1289,6 +1320,17 @@ json calculate_shape_data(json shapeJson){
     return result;
 }
 
+/**
+ * @brief Calculate core data from the given JSON input.
+ *
+ * This function takes a JSON object representing core data and processes it
+ * to generate a result JSON object. It optionally includes material data
+ * based on the provided flag.
+ *
+ * @param coreDataJson A JSON object containing the core data to be processed.
+ * @param includeMaterialData A boolean flag indicating whether to include material data in the processing.
+ * @return A JSON object containing the processed core data. If an exception occurs, a JSON object with the exception message is returned.
+ */
 json calculate_core_data(json coreDataJson, bool includeMaterialData){
     try {
         OpenMagnetics::CoreWrapper core(coreDataJson, includeMaterialData, true);
@@ -1503,6 +1545,17 @@ json get_coating_label(json wireJson){
     }
 }
 
+/**
+ * @brief Retrieves the wire coating information based on the provided label.
+ *
+ * This function iterates through a collection of wires, encodes their coating labels,
+ * and compares them with the provided label. If a match is found, it resolves the coating
+ * information of the wire. If the coating information cannot be resolved, it sets the 
+ * coating type to BARE. The resulting coating information is then converted to a JSON object.
+ *
+ * @param label The label used to identify the wire coating.
+ * @return A JSON object containing the wire coating information.
+ */
 json get_wire_coating_by_label(std::string label){
     auto wires = OpenMagnetics::get_wires();
     OpenMagnetics::InsulationWireCoating insulationWireCoating;
@@ -1523,6 +1576,17 @@ json get_wire_coating_by_label(std::string label){
     return result;
 }
 
+/**
+ * @brief Retrieves a list of unique coating labels for a given wire type.
+ * 
+ * This function takes a JSON object representing a wire type, converts it to an 
+ * OpenMagnetics::WireType object, and retrieves a list of wires of that type. 
+ * It then extracts the coating labels from these wires, ensuring that each label 
+ * is unique, and returns the list of unique coating labels.
+ * 
+ * @param wireTypeJson A JSON object representing the wire type.
+ * @return std::vector<std::string> A vector containing unique coating labels.
+ */
 std::vector<std::string> get_coating_labels_by_type(json wireTypeJson){
     OpenMagnetics::WireType wireType(wireTypeJson);
 
@@ -1539,6 +1603,16 @@ std::vector<std::string> get_coating_labels_by_type(json wireTypeJson){
     return coatingLabels;
 }
 
+/**
+ * @brief Loads core data from a JSON array and converts it to a new JSON array.
+ *
+ * This function takes a JSON array of core data, processes each core using the 
+ * OpenMagnetics::CoreWrapper class, and converts it back to JSON format. The 
+ * resulting JSON array is returned.
+ *
+ * @param coresJson A JSON array containing core data.
+ * @return A JSON array with processed core data.
+ */
 json load_core_data(json coresJson){
     json result = json::array();
     for (auto& coreJson : coresJson) {
@@ -1550,6 +1624,15 @@ json load_core_data(json coresJson){
     return result;
 }
 
+/**
+ * @brief Retrieves material data for a given material name.
+ *
+ * This function searches for core material data by its name using the 
+ * OpenMagnetics library and converts the result to a JSON object.
+ *
+ * @param materialName The name of the material to search for.
+ * @return A JSON object containing the material data.
+ */
 json get_material_data(std::string materialName){
 
     auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
@@ -1558,6 +1641,18 @@ json get_material_data(std::string materialName){
     return result;
 }
 
+/**
+ * @brief Retrieves core temperature-dependent parameters.
+ *
+ * This function takes core data and a temperature value as input and returns a JSON object containing various 
+ * temperature-dependent parameters of the core. These parameters include magnetic flux density saturation, 
+ * magnetic field strength saturation, initial permeability, effective permeability, reluctance, permeance, 
+ * and resistivity.
+ *
+ * @param coreData A JSON object containing the core data.
+ * @param temperature A double representing the temperature at which the parameters are to be evaluated.
+ * @return A JSON object containing the core temperature-dependent parameters.
+ */
 json get_core_temperature_dependant_parameters(json coreData, double temperature){
     OpenMagnetics::CoreWrapper core(coreData);
     json result;
@@ -1574,6 +1669,17 @@ json get_core_temperature_dependant_parameters(json coreData, double temperature
     return result;
 }
 
+/**
+ * @brief Retrieves shape data for a given shape name.
+ *
+ * This function attempts to find the core shape data associated with the provided shape name
+ * using the OpenMagnetics library. If successful, it converts the shape data to a JSON object
+ * and returns it. If an exception occurs during the process, it catches the exception and 
+ * returns an error message.
+ *
+ * @param shapeName The name of the shape for which data is to be retrieved.
+ * @return A JSON object containing the shape data if successful, or an error message if an exception occurs.
+ */
 json get_shape_data(std::string shapeName){
     try {
         auto shapeData = OpenMagnetics::find_core_shape_by_name(shapeName);
@@ -1587,6 +1693,14 @@ json get_shape_data(std::string shapeName){
     }
 }
 
+/**
+ * @brief Retrieves a list of available shape families.
+ *
+ * This function iterates through the enumeration of CoreShapeFamily and
+ * collects their names into a vector of strings.
+ *
+ * @return std::vector<std::string> A vector containing the names of all available shape families.
+ */
 std::vector<std::string> get_available_shape_families(){
     std::vector<std::string> families;
     for (auto& family : magic_enum::enum_names<OpenMagnetics::CoreShapeFamily>()) {
@@ -1596,6 +1710,15 @@ std::vector<std::string> get_available_shape_families(){
     return families;
 }
 
+/**
+ * @brief Retrieves a list of available core manufacturers.
+ *
+ * This function queries the available materials and extracts the manufacturer information
+ * from each material. It ensures that each manufacturer is included only once in the 
+ * returned list.
+ *
+ * @return A vector of strings containing the names of the available core manufacturers.
+ */
 std::vector<std::string> get_available_core_manufacturers(){
     std::vector<std::string> manufacturers;
     auto materials = OpenMagnetics::get_materials("");
@@ -1608,6 +1731,16 @@ std::vector<std::string> get_available_core_manufacturers(){
     return manufacturers;
 }
 
+/**
+ * @brief Retrieves a list of available core shape families.
+ *
+ * This function iterates through the enumeration of core shape families
+ * defined in the OpenMagnetics::CoreShapeFamily enum and collects their
+ * names into a vector of strings.
+ *
+ * @return std::vector<std::string> A vector containing the names of all
+ * available core shape families.
+ */
 std::vector<std::string> get_available_core_shape_families(){
     std::vector<std::string> families;
     for (auto& family : magic_enum::enum_names<OpenMagnetics::CoreShapeFamily>()) {
@@ -1617,6 +1750,15 @@ std::vector<std::string> get_available_core_shape_families(){
     return families;
 }
 
+/**
+ * @brief Retrieves a list of available core materials from a specified manufacturer.
+ * 
+ * This function queries the OpenMagnetics library to obtain the names of core materials
+ * provided by the given manufacturer.
+ * 
+ * @param manufacturer The name of the manufacturer whose core materials are to be retrieved.
+ * @return std::vector<std::string> A vector containing the names of the available core materials.
+ */
 std::vector<std::string> get_available_core_materials(std::string manufacturer){
     return OpenMagnetics::get_material_names(manufacturer);
 }
