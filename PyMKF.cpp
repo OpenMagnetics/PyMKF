@@ -696,6 +696,16 @@ json find_bobbin_by_name(json bobbinName) {
     }
 }
 
+
+/**
+ * @brief Finds insulation material data by its name.
+ *
+ * This function searches for insulation material data using the provided name.
+ * It returns the data in JSON format if found, or an exception message in JSON format if an error occurs.
+ *
+ * @param insulationMaterialName The name of the insulation material to search for, in JSON format.
+ * @return A JSON object containing the insulation material data if found, or an exception message if an error occurs.
+ */
 json find_insulation_material_by_name(json insulationMaterialName) {
     try {
         auto insulationMaterialData = OpenMagnetics::find_insulation_material_by_name(insulationMaterialName);
@@ -710,6 +720,16 @@ json find_insulation_material_by_name(json insulationMaterialName) {
     }
 }
 
+/**
+ * @brief Finds wire material data by name.
+ *
+ * This function searches for wire material data using the provided wire material name.
+ * It utilizes the OpenMagnetics library to perform the search and converts the result
+ * to a JSON object.
+ *
+ * @param wireMaterialName A JSON object containing the name of the wire material to search for.
+ * @return A JSON object containing the wire material data if found, or an exception message if an error occurs.
+ */
 json find_wire_material_by_name(json wireMaterialName) {
     try {
         auto wireMaterialData = OpenMagnetics::find_wire_material_by_name(wireMaterialName);
@@ -724,6 +744,18 @@ json find_wire_material_by_name(json wireMaterialName) {
     }
 }
 
+/**
+ * @brief Creates a basic bobbin from the given core data.
+ *
+ * This function takes a JSON object containing core data and a boolean flag indicating whether to use null dimensions.
+ * It creates a core object using the provided core data and then creates a bobbin using the core object.
+ * The resulting bobbin is converted to a JSON object and returned.
+ * If an exception occurs during the process, the exception message is caught and returned as a JSON object.
+ *
+ * @param coreDataJson A JSON object containing the core data.
+ * @param nullDimensions A boolean flag indicating whether to use null dimensions.
+ * @return A JSON object representing the created bobbin, or an exception message if an error occurs.
+ */
 json create_basic_bobbin(json coreDataJson, bool nullDimensions){
     try {
         OpenMagnetics::CoreWrapper core(coreDataJson, false, false, false);
@@ -739,7 +771,16 @@ json create_basic_bobbin(json coreDataJson, bool nullDimensions){
         return exception;
     }
 }
-
+/**
+ * @brief Processes core data and returns the processed description.
+ *
+ * This function takes a JSON object containing core data, processes it using the OpenMagnetics::CoreWrapper,
+ * and returns the processed description as a JSON object. If an exception occurs during processing, 
+ * it catches the exception and returns a JSON object containing the exception message.
+ *
+ * @param coreDataJson A JSON object containing the core data to be processed.
+ * @return A JSON object containing the processed core description or an exception message.
+ */
 json calculate_core_processed_description(json coreDataJson){
     try {
         OpenMagnetics::CoreWrapper core(coreDataJson, false, false, false);
