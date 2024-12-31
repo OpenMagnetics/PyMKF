@@ -42,6 +42,29 @@ using ordered_json = nlohmann::ordered_json;
 
 namespace py = pybind11;
 
+
+/**
+ * @brief Retrieves a dictionary of constant values used in the OpenMagnetics library.
+ * 
+ * This function creates a dictionary (py::dict) and populates it with various constant values 
+ * from the OpenMagnetics::Constants class. These constants include physical constants, 
+ * magnetic properties, and other parameters used in magnetic field calculations.
+ * 
+ * @return py::dict A dictionary containing the following key-value pairs:
+ * - "residualGap": The residual gap value.
+ * - "minimumNonResidualGap": The minimum non-residual gap value.
+ * - "vacuumPermeability": The permeability of vacuum.
+ * - "vacuumPermittivity": The permittivity of vacuum.
+ * - "magneticFluxDensitySaturation": The saturation magnetic flux density.
+ * - "spacerProtudingPercentage": The percentage of spacer protruding.
+ * - "coilPainterScale": The scale factor for coil painting.
+ * - "minimumDistributedFringingFactor": The minimum distributed fringing factor.
+ * - "maximumDistributedFringingFactor": The maximum distributed fringing factor.
+ * - "initialGapLengthForSearching": The initial gap length for searching.
+ * - "roshenMagneticFieldStrengthStep": The step size for Roshen magnetic field strength.
+ * - "foilToSectionMargin": The margin between foil and section.
+ * - "planarToSectionMargin": The margin between planar and section.
+ */
 py::dict get_constants() {
     auto constants = OpenMagnetics::Constants();
     py::dict constantsMap;
@@ -63,6 +86,16 @@ py::dict get_constants() {
 }
 
 
+/**
+ * @brief Retrieves the default configuration values as a Python dictionary.
+ *
+ * This function creates an instance of the OpenMagnetics::Defaults class and converts its
+ * properties to a Python dictionary using the pybind11 library. The dictionary contains
+ * various default settings related to core losses, temperature models, magnetic field
+ * strength, and other parameters used in the OpenMagnetics framework.
+ *
+ * @return py::dict A dictionary containing the default configuration values.
+ */
 py::dict get_defaults() {
     auto defaults = OpenMagnetics::Defaults();
     py::dict defaultsMap;
@@ -108,6 +141,16 @@ py::dict get_defaults() {
     return defaultsMap;
 }
 
+/**
+ * @brief Retrieves a list of core materials.
+ * 
+ * This function calls the OpenMagnetics::get_materials function to obtain a list of core materials.
+ * It then converts each material to a JSON object and adds it to a JSON array.
+ * If an exception occurs during this process, it catches the exception and returns a JSON object
+ * containing the exception message.
+ * 
+ * @return json A JSON array of core materials or a JSON object containing an exception message.
+ */
 json get_core_materials() {
     try {
         auto materials = OpenMagnetics::get_materials(std::nullopt);
@@ -126,6 +169,19 @@ json get_core_materials() {
     }
 }
 
+/**
+ * @brief Retrieves the initial permeability of a given material based on specified conditions.
+ *
+ * This function finds the core material by its name and calculates its initial permeability
+ * based on the provided temperature, magnetic field DC bias, and frequency.
+ *
+ * @param materialName The name of the material in JSON format.
+ * @param temperature The temperature at which the permeability is to be calculated.
+ * @param magneticFieldDcBias The DC bias of the magnetic field.
+ * @param frequency The frequency at which the permeability is to be calculated.
+ * @return The initial permeability of the material as a double.
+ * @throws std::exception If an error occurs during the process, an exception is caught and its message is returned in JSON format.
+ */
 double get_material_permeability(json materialName, double temperature, double magneticFieldDcBias, double frequency) {
     try {
         auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
@@ -140,6 +196,17 @@ double get_material_permeability(json materialName, double temperature, double m
     }
 }
 
+/**
+ * @brief Retrieves the resistivity of a given material at a specified temperature.
+ *
+ * This function uses the OpenMagnetics library to find the core material by name and then
+ * calculates its resistivity at the given temperature using the appropriate resistivity model.
+ *
+ * @param materialName A JSON object containing the name of the material.
+ * @param temperature The temperature at which to calculate the resistivity.
+ * @return The resistivity of the material at the specified temperature.
+ * @throws std::exception If an error occurs while retrieving the material data or calculating resistivity.
+ */
 double get_material_resistivity(json materialName, double temperature) {
     try {
         auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
@@ -153,6 +220,18 @@ double get_material_resistivity(json materialName, double temperature) {
     }
 }
 
+/**
+ * @brief Retrieves the Steinmetz coefficients for a given core material at a specified frequency.
+ *
+ * This function calls the OpenMagnetics::CoreLossesModel::get_steinmetz_coefficients method to obtain
+ * the Steinmetz coefficients for the specified core material and frequency. The result is then converted
+ * to a JSON object and returned. If an exception occurs during the process, the exception message is
+ * caught and returned as a JSON object.
+ *
+ * @param materialName The name of the core material for which the Steinmetz coefficients are to be retrieved.
+ * @param frequency The frequency at which the Steinmetz coefficients are to be calculated.
+ * @return A JSON object containing the Steinmetz coefficients or an exception message if an error occurs.
+ */
 json get_core_material_steinmetz_coefficients(json materialName, double frequency) {
     try {
         auto steinmetzCoreLossesMethodRangeDatum = OpenMagnetics::CoreLossesModel::get_steinmetz_coefficients(materialName, frequency);
@@ -167,6 +246,15 @@ json get_core_material_steinmetz_coefficients(json materialName, double frequenc
     }
 }
 
+/**
+ * @brief Retrieves core shapes and converts them to JSON format.
+ *
+ * This function calls the OpenMagnetics::get_shapes function to obtain a list of core shapes.
+ * It then converts each shape to a JSON object and adds it to a JSON array.
+ * If an exception occurs during this process, the exception message is caught and returned in JSON format.
+ *
+ * @return A JSON array containing the core shapes, or a JSON object with an exception message if an error occurs.
+ */
 json get_core_shapes() {
     try {
         auto shapes = OpenMagnetics::get_shapes(true);
@@ -184,6 +272,17 @@ json get_core_shapes() {
         return exception;
     }
 }
+
+/**
+ * @brief Retrieves a list of unique core shape families.
+ *
+ * This function fetches all available core shapes using the OpenMagnetics library,
+ * extracts their families, and returns a JSON array of unique core shape families.
+ * If an exception occurs during the process, it catches the exception and returns
+ * a JSON object containing the exception message.
+ *
+ * @return json A JSON array of unique core shape families or a JSON object with an exception message.
+ */
 json get_core_shape_families() {
     try {
         auto shapes = OpenMagnetics::get_shapes(false);
@@ -206,6 +305,17 @@ json get_core_shape_families() {
         return exception;
     }
 }
+
+/**
+ * @brief Retrieves a list of wires and converts them to JSON format.
+ *
+ * This function calls the OpenMagnetics::get_wires() function to obtain a list of wires.
+ * It then converts each wire to a JSON object using the OpenMagnetics::to_json() function
+ * and stores them in a JSON array. If an exception occurs during this process, it catches
+ * the exception and returns a JSON object containing the exception message.
+ *
+ * @return A JSON array containing the wire data, or a JSON object with an exception message if an error occurs.
+ */
 json get_wires() {
     try {
         auto wires = OpenMagnetics::get_wires();
@@ -223,6 +333,17 @@ json get_wires() {
         return exception;
     }
 }
+
+/**
+ * @brief Retrieves a list of bobbins in JSON format.
+ *
+ * This function calls the OpenMagnetics::get_bobbins() function to get a list of bobbins,
+ * converts each bobbin to a JSON object using OpenMagnetics::to_json(), and returns the 
+ * list of JSON objects. If an exception occurs during the process, it catches the exception 
+ * and returns a JSON object containing the exception message.
+ *
+ * @return json A JSON array of bobbins or a JSON object with exception details.
+ */
 json get_bobbins() {
     try {
         auto bobbins = OpenMagnetics::get_bobbins();
@@ -240,6 +361,16 @@ json get_bobbins() {
         return exception;
     }
 }
+
+/**
+ * @brief Retrieves a list of insulation materials.
+ *
+ * This function calls the OpenMagnetics::get_insulation_materials() function to obtain a list of insulation materials.
+ * It then converts each material to a JSON object and adds it to a JSON array.
+ * If an exception occurs during this process, the exception message is caught and returned as a JSON object.
+ *
+ * @return A JSON array containing the insulation materials, or a JSON object with an exception message if an error occurs.
+ */
 json get_insulation_materials() {
     try {
         auto insulationMaterials = OpenMagnetics::get_insulation_materials();
@@ -257,6 +388,16 @@ json get_insulation_materials() {
         return exception;
     }
 }
+
+/**
+ * @brief Retrieves the wire materials and converts them to JSON format.
+ *
+ * This function calls the OpenMagnetics::get_wire_materials() function to obtain a list of wire materials.
+ * It then converts each wire material to a JSON object and adds it to a JSON array.
+ * If an exception occurs during this process, it catches the exception and returns a JSON object containing the exception message.
+ *
+ * @return A JSON array containing the wire materials, or a JSON object with an exception message if an error occurs.
+ */
 json get_wire_materials() {
     try {
         auto wireMaterials = OpenMagnetics::get_wire_materials();
@@ -275,6 +416,16 @@ json get_wire_materials() {
     }
 }
 
+/**
+ * @brief Retrieves the names of core materials.
+ * 
+ * This function calls the OpenMagnetics::get_material_names function to obtain a list of core material names.
+ * It then converts this list into a JSON array and returns it.
+ * 
+ * @return json A JSON array containing the names of core materials. If an exception occurs, a JSON object with the exception message is returned.
+ * 
+ * @throws std::exception If an error occurs while retrieving the material names.
+ */
 json get_core_material_names() {
     try {
         auto materialNames = OpenMagnetics::get_material_names(std::nullopt);
@@ -291,6 +442,17 @@ json get_core_material_names() {
     }
 }
 
+/**
+ * @brief Retrieves the core material names by manufacturer.
+ *
+ * This function fetches the core material names associated with a given manufacturer
+ * and returns them in a JSON array. If an exception occurs during the process, 
+ * it catches the exception and returns a JSON object containing the exception message.
+ *
+ * @param manufacturerName The name of the manufacturer whose core material names are to be retrieved.
+ * @return A JSON array containing the core material names. If an exception occurs, 
+ *         a JSON object with the exception message is returned.
+ */
 json get_core_material_names_by_manufacturer(std::string manufacturerName) {
     try {
         auto materialNames = OpenMagnetics::get_material_names(manufacturerName);
@@ -307,6 +469,16 @@ json get_core_material_names_by_manufacturer(std::string manufacturerName) {
     }
 }
 
+/**
+ * @brief Retrieves the names of core shapes.
+ *
+ * This function fetches the names of core shapes based on the specified settings.
+ * It can include or exclude toroidal cores based on the input parameter.
+ *
+ * @param includeToroidal A boolean flag indicating whether to include toroidal cores in the result.
+ * @return A JSON array containing the names of the core shapes. If an exception occurs, 
+ *         a JSON object with the exception message is returned.
+ */
 json get_core_shape_names(bool includeToroidal) {
     try {
         auto settings = OpenMagnetics::Settings::GetInstance();
@@ -325,6 +497,15 @@ json get_core_shape_names(bool includeToroidal) {
     }
 }
 
+/**
+ * @brief Retrieves the names of wires.
+ * 
+ * This function calls the OpenMagnetics::get_wire_names() function to obtain a list of wire names.
+ * It then converts this list into a JSON array and returns it.
+ * 
+ * @return json A JSON array containing the names of wires. If an exception occurs, a JSON object
+ *         with the exception message is returned.
+ */
 json get_wire_names() {
     try {
         auto wireNames = OpenMagnetics::get_wire_names();
@@ -341,6 +522,15 @@ json get_wire_names() {
     }
 }
 
+/**
+ * @brief Retrieves the names of bobbins.
+ *
+ * This function calls the OpenMagnetics::get_bobbin_names() function to get a list of bobbin names.
+ * It then converts this list into a JSON array and returns it.
+ *
+ * @return json A JSON array containing the names of bobbins. If an exception occurs, a JSON object
+ *         containing the exception message is returned.
+ */
 json get_bobbin_names() {
     try {
         auto bobbinNames = OpenMagnetics::get_bobbin_names();
@@ -357,6 +547,15 @@ json get_bobbin_names() {
     }
 }
 
+/**
+ * @brief Retrieves the names of insulation materials.
+ *
+ * This function calls the OpenMagnetics::get_insulation_material_names() function to get a list of insulation material names.
+ * It then converts the list into a JSON array and returns it.
+ * If an exception occurs during the process, it catches the exception and returns a JSON object containing the exception message.
+ *
+ * @return json A JSON array containing the names of insulation materials, or a JSON object with an exception message if an error occurs.
+ */
 json get_insulation_material_names() {
     try {
         auto insulationMaterialNames = OpenMagnetics::get_insulation_material_names();
@@ -373,6 +572,15 @@ json get_insulation_material_names() {
     }
 }
 
+/**
+ * @brief Retrieves the names of wire materials.
+ *
+ * This function calls the OpenMagnetics::get_wire_material_names() function to obtain a list of wire material names.
+ * It then converts this list into a JSON array and returns it.
+ * If an exception occurs during the process, it catches the exception and returns a JSON object containing the exception message.
+ *
+ * @return json A JSON array containing the names of wire materials, or a JSON object with an exception message if an error occurs.
+ */
 json get_wire_material_names() {
     try {
         auto wireMaterialNames = OpenMagnetics::get_wire_material_names();
@@ -389,6 +597,16 @@ json get_wire_material_names() {
     }
 }
 
+/**
+ * @brief Finds core material data by name.
+ *
+ * This function searches for core material data using the provided material name.
+ * It utilizes the OpenMagnetics library to perform the search and converts the
+ * resulting data to a JSON format.
+ *
+ * @param materialName A JSON object containing the name of the material to search for.
+ * @return A JSON object containing the core material data if found, or an exception message if an error occurs.
+ */
 json find_core_material_by_name(json materialName) {
     try {
         auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
@@ -403,6 +621,17 @@ json find_core_material_by_name(json materialName) {
     }
 }
 
+/**
+ * @brief Finds core shape data by name.
+ *
+ * This function attempts to find the core shape data corresponding to the given shape name.
+ * If successful, it converts the shape data to a JSON object and returns it.
+ * If an exception occurs during the process, it catches the exception and returns a JSON object
+ * containing the exception message.
+ *
+ * @param shapeName The name of the core shape to find.
+ * @return A JSON object containing the core shape data if found, or an exception message if an error occurs.
+ */
 json find_core_shape_by_name(json shapeName) {
     try {
         auto shapeData = OpenMagnetics::find_core_shape_by_name(shapeName);
@@ -417,6 +646,17 @@ json find_core_shape_by_name(json shapeName) {
     }
 }
 
+/**
+ * @brief Finds wire data by its name.
+ *
+ * This function searches for wire data using the provided wire name.
+ * If the wire is found, it returns the wire data in JSON format.
+ * If an exception occurs during the search, it catches the exception
+ * and returns a JSON object containing the exception message.
+ *
+ * @param wireName The name of the wire to search for, in JSON format.
+ * @return A JSON object containing the wire data if found, or an exception message if an error occurs.
+ */
 json find_wire_by_name(json wireName) {
     try {
         auto wireData = OpenMagnetics::find_wire_by_name(wireName);
@@ -431,6 +671,17 @@ json find_wire_by_name(json wireName) {
     }
 }
 
+/**
+ * @brief Finds bobbin data by its name.
+ *
+ * This function attempts to find the bobbin data corresponding to the given bobbin name.
+ * It uses the OpenMagnetics library to perform the search and converts the result to a JSON object.
+ * If an exception occurs during the search, it catches the exception and returns a JSON object
+ * containing the exception message.
+ *
+ * @param bobbinName The name of the bobbin to search for, provided as a JSON object.
+ * @return A JSON object containing the bobbin data if found, or an exception message if an error occurs.
+ */
 json find_bobbin_by_name(json bobbinName) {
     try {
         auto bobbinData = OpenMagnetics::find_bobbin_by_name(bobbinName);
@@ -445,6 +696,16 @@ json find_bobbin_by_name(json bobbinName) {
     }
 }
 
+
+/**
+ * @brief Finds insulation material data by its name.
+ *
+ * This function searches for insulation material data using the provided name.
+ * It returns the data in JSON format if found, or an exception message in JSON format if an error occurs.
+ *
+ * @param insulationMaterialName The name of the insulation material to search for, in JSON format.
+ * @return A JSON object containing the insulation material data if found, or an exception message if an error occurs.
+ */
 json find_insulation_material_by_name(json insulationMaterialName) {
     try {
         auto insulationMaterialData = OpenMagnetics::find_insulation_material_by_name(insulationMaterialName);
@@ -459,6 +720,16 @@ json find_insulation_material_by_name(json insulationMaterialName) {
     }
 }
 
+/**
+ * @brief Finds wire material data by name.
+ *
+ * This function searches for wire material data using the provided wire material name.
+ * It utilizes the OpenMagnetics library to perform the search and converts the result
+ * to a JSON object.
+ *
+ * @param wireMaterialName A JSON object containing the name of the wire material to search for.
+ * @return A JSON object containing the wire material data if found, or an exception message if an error occurs.
+ */
 json find_wire_material_by_name(json wireMaterialName) {
     try {
         auto wireMaterialData = OpenMagnetics::find_wire_material_by_name(wireMaterialName);
@@ -473,6 +744,18 @@ json find_wire_material_by_name(json wireMaterialName) {
     }
 }
 
+/**
+ * @brief Creates a basic bobbin from the given core data.
+ *
+ * This function takes a JSON object containing core data and a boolean flag indicating whether to use null dimensions.
+ * It creates a core object using the provided core data and then creates a bobbin using the core object.
+ * The resulting bobbin is converted to a JSON object and returned.
+ * If an exception occurs during the process, the exception message is caught and returned as a JSON object.
+ *
+ * @param coreDataJson A JSON object containing the core data.
+ * @param nullDimensions A boolean flag indicating whether to use null dimensions.
+ * @return A JSON object representing the created bobbin, or an exception message if an error occurs.
+ */
 json create_basic_bobbin(json coreDataJson, bool nullDimensions){
     try {
         OpenMagnetics::CoreWrapper core(coreDataJson, false, false, false);
@@ -488,7 +771,16 @@ json create_basic_bobbin(json coreDataJson, bool nullDimensions){
         return exception;
     }
 }
-
+/**
+ * @brief Processes core data and returns the processed description.
+ *
+ * This function takes a JSON object containing core data, processes it using the OpenMagnetics::CoreWrapper,
+ * and returns the processed description as a JSON object. If an exception occurs during processing, 
+ * it catches the exception and returns a JSON object containing the exception message.
+ *
+ * @param coreDataJson A JSON object containing the core data to be processed.
+ * @return A JSON object containing the processed core description or an exception message.
+ */
 json calculate_core_processed_description(json coreDataJson){
     try {
         OpenMagnetics::CoreWrapper core(coreDataJson, false, false, false);
@@ -987,6 +1279,16 @@ void reset_settings() {
     settings->reset();
 }
 
+/**
+ * @brief Calculate the harmonics of a given waveform.
+ *
+ * This function takes a JSON representation of a waveform and a frequency, 
+ * then calculates the harmonics of the waveform.
+ *
+ * @param waveformJson A JSON object representing the waveform.
+ * @param frequency The frequency at which to sample the waveform.
+ * @return A JSON object containing the harmonics data.
+ */
 json calculate_harmonics(json waveformJson, double frequency) {
     OpenMagnetics::Waveform waveform;
     OpenMagnetics::from_json(waveformJson, waveform);
@@ -999,6 +1301,18 @@ json calculate_harmonics(json waveformJson, double frequency) {
     return result;
 }
 
+/**
+ * @brief Calculate processed data from harmonics and waveform JSON inputs.
+ *
+ * This function takes JSON representations of harmonics and waveform data,
+ * converts them to their respective OpenMagnetics types, and then calculates
+ * the processed data using the OpenMagnetics::InputsWrapper::calculate_processed_data
+ * method. The result is then converted back to JSON and returned.
+ *
+ * @param harmonicsJson JSON object containing harmonics data.
+ * @param waveformJson JSON object containing waveform data.
+ * @return JSON object containing the processed data.
+ */
 json calculate_processed(json harmonicsJson, json waveformJson) {
     OpenMagnetics::Waveform waveform;
     OpenMagnetics::Harmonics harmonics;
@@ -1012,6 +1326,15 @@ json calculate_processed(json harmonicsJson, json waveformJson) {
     return result;
 }
 
+/**
+ * @brief Calculate shape data based on the provided JSON input.
+ *
+ * This function takes a JSON object representing the shape data, processes it using the OpenMagnetics library,
+ * and returns the processed data as a JSON object.
+ *
+ * @param shapeJson A JSON object containing the shape data.
+ * @return A JSON object containing the processed shape data.
+ */
 json calculate_shape_data(json shapeJson){
     OpenMagnetics::CoreShape shape(shapeJson);
     OpenMagnetics::CoreWrapper core;
@@ -1038,6 +1361,17 @@ json calculate_shape_data(json shapeJson){
     return result;
 }
 
+/**
+ * @brief Calculate core data from the given JSON input.
+ *
+ * This function takes a JSON object representing core data and processes it
+ * to generate a result JSON object. It optionally includes material data
+ * based on the provided flag.
+ *
+ * @param coreDataJson A JSON object containing the core data to be processed.
+ * @param includeMaterialData A boolean flag indicating whether to include material data in the processing.
+ * @return A JSON object containing the processed core data. If an exception occurs, a JSON object with the exception message is returned.
+ */
 json calculate_core_data(json coreDataJson, bool includeMaterialData){
     try {
         OpenMagnetics::CoreWrapper core(coreDataJson, includeMaterialData, true);
@@ -1252,6 +1586,17 @@ json get_coating_label(json wireJson){
     }
 }
 
+/**
+ * @brief Retrieves the wire coating information based on the provided label.
+ *
+ * This function iterates through a collection of wires, encodes their coating labels,
+ * and compares them with the provided label. If a match is found, it resolves the coating
+ * information of the wire. If the coating information cannot be resolved, it sets the 
+ * coating type to BARE. The resulting coating information is then converted to a JSON object.
+ *
+ * @param label The label used to identify the wire coating.
+ * @return A JSON object containing the wire coating information.
+ */
 json get_wire_coating_by_label(std::string label){
     auto wires = OpenMagnetics::get_wires();
     OpenMagnetics::InsulationWireCoating insulationWireCoating;
@@ -1272,6 +1617,17 @@ json get_wire_coating_by_label(std::string label){
     return result;
 }
 
+/**
+ * @brief Retrieves a list of unique coating labels for a given wire type.
+ * 
+ * This function takes a JSON object representing a wire type, converts it to an 
+ * OpenMagnetics::WireType object, and retrieves a list of wires of that type. 
+ * It then extracts the coating labels from these wires, ensuring that each label 
+ * is unique, and returns the list of unique coating labels.
+ * 
+ * @param wireTypeJson A JSON object representing the wire type.
+ * @return std::vector<std::string> A vector containing unique coating labels.
+ */
 std::vector<std::string> get_coating_labels_by_type(json wireTypeJson){
     OpenMagnetics::WireType wireType(wireTypeJson);
 
@@ -1288,6 +1644,16 @@ std::vector<std::string> get_coating_labels_by_type(json wireTypeJson){
     return coatingLabels;
 }
 
+/**
+ * @brief Loads core data from a JSON array and converts it to a new JSON array.
+ *
+ * This function takes a JSON array of core data, processes each core using the 
+ * OpenMagnetics::CoreWrapper class, and converts it back to JSON format. The 
+ * resulting JSON array is returned.
+ *
+ * @param coresJson A JSON array containing core data.
+ * @return A JSON array with processed core data.
+ */
 json load_core_data(json coresJson){
     json result = json::array();
     for (auto& coreJson : coresJson) {
@@ -1299,6 +1665,15 @@ json load_core_data(json coresJson){
     return result;
 }
 
+/**
+ * @brief Retrieves material data for a given material name.
+ *
+ * This function searches for core material data by its name using the 
+ * OpenMagnetics library and converts the result to a JSON object.
+ *
+ * @param materialName The name of the material to search for.
+ * @return A JSON object containing the material data.
+ */
 json get_material_data(std::string materialName){
 
     auto materialData = OpenMagnetics::find_core_material_by_name(materialName);
@@ -1307,6 +1682,18 @@ json get_material_data(std::string materialName){
     return result;
 }
 
+/**
+ * @brief Retrieves core temperature-dependent parameters.
+ *
+ * This function takes core data and a temperature value as input and returns a JSON object containing various 
+ * temperature-dependent parameters of the core. These parameters include magnetic flux density saturation, 
+ * magnetic field strength saturation, initial permeability, effective permeability, reluctance, permeance, 
+ * and resistivity.
+ *
+ * @param coreData A JSON object containing the core data.
+ * @param temperature A double representing the temperature at which the parameters are to be evaluated.
+ * @return A JSON object containing the core temperature-dependent parameters.
+ */
 json get_core_temperature_dependant_parameters(json coreData, double temperature){
     OpenMagnetics::CoreWrapper core(coreData);
     json result;
@@ -1323,6 +1710,17 @@ json get_core_temperature_dependant_parameters(json coreData, double temperature
     return result;
 }
 
+/**
+ * @brief Retrieves shape data for a given shape name.
+ *
+ * This function attempts to find the core shape data associated with the provided shape name
+ * using the OpenMagnetics library. If successful, it converts the shape data to a JSON object
+ * and returns it. If an exception occurs during the process, it catches the exception and 
+ * returns an error message.
+ *
+ * @param shapeName The name of the shape for which data is to be retrieved.
+ * @return A JSON object containing the shape data if successful, or an error message if an exception occurs.
+ */
 json get_shape_data(std::string shapeName){
     try {
         auto shapeData = OpenMagnetics::find_core_shape_by_name(shapeName);
@@ -1336,6 +1734,14 @@ json get_shape_data(std::string shapeName){
     }
 }
 
+/**
+ * @brief Retrieves a list of available shape families.
+ *
+ * This function iterates through the enumeration of CoreShapeFamily and
+ * collects their names into a vector of strings.
+ *
+ * @return std::vector<std::string> A vector containing the names of all available shape families.
+ */
 std::vector<std::string> get_available_shape_families(){
     std::vector<std::string> families;
     for (auto& family : magic_enum::enum_names<OpenMagnetics::CoreShapeFamily>()) {
@@ -1345,6 +1751,15 @@ std::vector<std::string> get_available_shape_families(){
     return families;
 }
 
+/**
+ * @brief Retrieves a list of available core manufacturers.
+ *
+ * This function queries the available materials and extracts the manufacturer information
+ * from each material. It ensures that each manufacturer is included only once in the 
+ * returned list.
+ *
+ * @return A vector of strings containing the names of the available core manufacturers.
+ */
 std::vector<std::string> get_available_core_manufacturers(){
     std::vector<std::string> manufacturers;
     auto materials = OpenMagnetics::get_materials("");
@@ -1357,6 +1772,16 @@ std::vector<std::string> get_available_core_manufacturers(){
     return manufacturers;
 }
 
+/**
+ * @brief Retrieves a list of available core shape families.
+ *
+ * This function iterates through the enumeration of core shape families
+ * defined in the OpenMagnetics::CoreShapeFamily enum and collects their
+ * names into a vector of strings.
+ *
+ * @return std::vector<std::string> A vector containing the names of all
+ * available core shape families.
+ */
 std::vector<std::string> get_available_core_shape_families(){
     std::vector<std::string> families;
     for (auto& family : magic_enum::enum_names<OpenMagnetics::CoreShapeFamily>()) {
@@ -1366,18 +1791,52 @@ std::vector<std::string> get_available_core_shape_families(){
     return families;
 }
 
+/**
+ * @brief Retrieves a list of available core materials from a specified manufacturer.
+ * 
+ * This function queries the OpenMagnetics library to obtain the names of core materials
+ * provided by the given manufacturer.
+ * 
+ * @param manufacturer The name of the manufacturer whose core materials are to be retrieved.
+ * @return std::vector<std::string> A vector containing the names of the available core materials.
+ */
 std::vector<std::string> get_available_core_materials(std::string manufacturer){
     return OpenMagnetics::get_material_names(manufacturer);
 }
 
+/**
+ * @brief Retrieves a list of available core shapes.
+ *
+ * This function calls the OpenMagnetics::get_shape_names() function to obtain
+ * a vector of strings representing the names of available core shapes.
+ *
+ * @return std::vector<std::string> A vector containing the names of available core shapes.
+ */
 std::vector<std::string> get_available_core_shapes(){
     return OpenMagnetics::get_shape_names();
 }
 
+/**
+ * @brief Retrieves a list of available wire names.
+ * 
+ * This function calls the OpenMagnetics::get_wire_names() function to obtain
+ * a vector of strings, each representing the name of an available wire.
+ * 
+ * @return std::vector<std::string> A vector containing the names of available wires.
+ */
 std::vector<std::string> get_available_wires(){
     return OpenMagnetics::get_wire_names();
 }
 
+/**
+ * @brief Retrieves a list of unique wire standard names from a given JSON object.
+ *
+ * This function takes a JSON object representing wire standards, extracts the wire information,
+ * and returns a vector of unique wire standard names.
+ *
+ * @param wireStandardJson A JSON object containing wire standard information.
+ * @return std::vector<std::string> A vector containing unique wire standard names.
+ */
 std::vector<std::string> get_unique_wire_diameters(json wireStandardJson){
     OpenMagnetics::WireStandard wireStandard(wireStandardJson);
 
@@ -1398,6 +1857,15 @@ std::vector<std::string> get_unique_wire_diameters(json wireStandardJson){
     return uniqueStandardName;
 }
 
+/**
+ * @brief Retrieves a list of available wire types.
+ *
+ * This function iterates through all entries of the WireType enum and converts each entry to a JSON string,
+ * which is then added to a vector of strings. The function skips the WireType::PLANAR type as it is not 
+ * currently supported.
+ *
+ * @return std::vector<std::string> A vector containing JSON strings representing the available wire types.
+ */
 std::vector<std::string> get_available_wire_types(){
     std::vector<std::string> wireTypes;
 
@@ -1414,6 +1882,16 @@ std::vector<std::string> get_available_wire_types(){
     return wireTypes;
 }
 
+/**
+ * @brief Retrieves a list of available wire standards.
+ *
+ * This function iterates through all entries of the WireStandard enumeration
+ * and converts each entry to a JSON string representation. The resulting list
+ * of JSON strings is returned.
+ *
+ * @return std::vector<std::string> A vector containing JSON string representations
+ *                                  of all available wire standards.
+ */
 std::vector<std::string> get_available_wire_standards(){
     std::vector<std::string> wireStandards;
 
@@ -1426,6 +1904,18 @@ std::vector<std::string> get_available_wire_standards(){
     return wireStandards;
 }
 
+/**
+ * @brief Calculate the gap reluctance based on core gap data and model name.
+ *
+ * This function takes core gap data in JSON format and a model name as a string,
+ * converts the model name to uppercase, and uses it to create a reluctance model.
+ * It then calculates the gap reluctance using the provided core gap data and
+ * returns the result in JSON format.
+ *
+ * @param coreGapData A JSON object containing the core gap data.
+ * @param modelNameJson A string representing the model name in JSON format.
+ * @return A JSON object containing the calculated gap reluctance.
+ */
 json calculate_gap_reluctance(json coreGapData, std::string modelNameJson){
     std::string modelNameJsonUpper = modelNameJson;
     std::transform(modelNameJsonUpper.begin(), modelNameJsonUpper.end(), modelNameJsonUpper.begin(), ::toupper);
@@ -1440,169 +1930,20 @@ json calculate_gap_reluctance(json coreGapData, std::string modelNameJson){
     return result;
 }
 
-json get_gap_reluctance_model_information(){
-    json info;
-    info["information"] = OpenMagnetics::ReluctanceModel::get_models_information();
-    info["errors"] = OpenMagnetics::ReluctanceModel::get_models_errors();
-    info["internal_links"] = OpenMagnetics::ReluctanceModel::get_models_internal_links();
-    info["external_links"] = OpenMagnetics::ReluctanceModel::get_models_external_links();
-    return info;
-}
-
-double calculate_inductance_from_number_turns_and_gapping(json coreData,
-                                                          json coilData,
-                                                          json operatingPointData,
-                                                          json modelsData){
-    OpenMagnetics::CoreWrapper core(coreData);
-    OpenMagnetics::CoilWrapper coil(coilData);
-    OpenMagnetics::OperatingPoint operatingPoint(operatingPointData);
-
-    std::map<std::string, std::string> models = modelsData.get<std::map<std::string, std::string>>();
-
-    auto reluctanceModelName = OpenMagnetics::Defaults().reluctanceModelDefault;
-    if (models.find("reluctance") != models.end()) {
-        std::string modelNameJsonUpper = models["reluctance"];
-        std::transform(modelNameJsonUpper.begin(), modelNameJsonUpper.end(), modelNameJsonUpper.begin(), ::toupper);
-        reluctanceModelName = magic_enum::enum_cast<OpenMagnetics::ReluctanceModels>(modelNameJsonUpper).value();
-    }
-
-    OpenMagnetics::MagnetizingInductance magnetizingInductanceObj(reluctanceModelName);
-    double magnetizingInductance = magnetizingInductanceObj.calculate_inductance_from_number_turns_and_gapping(core, coil, &operatingPoint).get_magnetizing_inductance().get_nominal().value();
-
-    return magnetizingInductance;
-}
-
-
-double calculate_number_turns_from_gapping_and_inductance(json coreData,
-                                                          json inputsData,    
-                                                          json modelsData){
-    OpenMagnetics::CoreWrapper core(coreData);
-    OpenMagnetics::InputsWrapper inputs(inputsData);
-
-    std::map<std::string, std::string> models = modelsData.get<std::map<std::string, std::string>>();
-    
-    auto reluctanceModelName = OpenMagnetics::Defaults().reluctanceModelDefault;
-    if (models.find("reluctance") != models.end()) {
-        std::string modelNameJsonUpper = models["reluctance"];
-        std::transform(modelNameJsonUpper.begin(), modelNameJsonUpper.end(), modelNameJsonUpper.begin(), ::toupper);
-        reluctanceModelName = magic_enum::enum_cast<OpenMagnetics::ReluctanceModels>(modelNameJsonUpper).value();
-    }
-
-    OpenMagnetics::MagnetizingInductance magnetizingInductanceObj(reluctanceModelName);
-    double numberTurns = magnetizingInductanceObj.calculate_number_turns_from_gapping_and_inductance(core, &inputs);
-
-    return numberTurns;
-}
-
-
-json calculate_gapping_from_number_turns_and_inductance(json coreData,
-                                                               json coilData,
-                                                               json inputsData,
-                                                               std::string gappingTypeJson,
-                                                               int decimals,
-                                                               json modelsData){
-    OpenMagnetics::CoreWrapper core(coreData);
-    OpenMagnetics::CoilWrapper coil(coilData);
-    OpenMagnetics::InputsWrapper inputs(inputsData);
-
-    std::map<std::string, std::string> models = modelsData.get<std::map<std::string, std::string>>();
-    OpenMagnetics::GappingType gappingType = magic_enum::enum_cast<OpenMagnetics::GappingType>(gappingTypeJson).value();
-    
-    auto reluctanceModelName = OpenMagnetics::Defaults().reluctanceModelDefault;
-    if (models.find("reluctance") != models.end()) {
-        std::string modelNameJsonUpper = models["reluctance"];
-        std::transform(modelNameJsonUpper.begin(), modelNameJsonUpper.end(), modelNameJsonUpper.begin(), ::toupper);
-        reluctanceModelName = magic_enum::enum_cast<OpenMagnetics::ReluctanceModels>(modelNameJsonUpper).value();
-    }
-
-    OpenMagnetics::MagnetizingInductance magnetizingInductanceObj(reluctanceModelName);
-    std::vector<OpenMagnetics::CoreGap> gapping = magnetizingInductanceObj.calculate_gapping_from_number_turns_and_inductance(core,
-                                                                                                       coil,
-                                                                                                       &inputs,
-                                                                                                       gappingType,
-                                                                                                       decimals);
-
-    core.set_processed_description(std::nullopt);
-    core.set_geometrical_description(std::nullopt);
-    core.get_mutable_functional_description().set_gapping(gapping);
-    core.process_data();
-    core.process_gap();
-    auto geometricalDescription = core.create_geometrical_description();
-    core.set_geometrical_description(geometricalDescription);
-
-    json result;
-    to_json(result, core);
-    return result;
-}
-
-json calculate_core_losses(json coreData,
-                                  json coilData,
-                                  json inputsData,    
-                                  json modelsData){
-
-    OpenMagnetics::CoreWrapper core(coreData);
-    OpenMagnetics::CoilWrapper coil(coilData);
-    OpenMagnetics::InputsWrapper inputs(inputsData);
-    auto operatingPoint = inputs.get_operating_point(0);
-    OpenMagnetics::OperatingPointExcitation excitation = operatingPoint.get_excitations_per_winding()[0];
-    double magnetizingInductance = OpenMagnetics::resolve_dimensional_values(inputs.get_design_requirements().get_magnetizing_inductance());
-    if (!excitation.get_current()) {
-        auto magnetizingCurrent = OpenMagnetics::InputsWrapper::calculate_magnetizing_current(excitation, magnetizingInductance);
-        excitation.set_current(magnetizingCurrent);
-        operatingPoint.get_mutable_excitations_per_winding()[0] = excitation;
-    }
-
-    auto defaults = OpenMagnetics::Defaults();
-
-    std::map<std::string, std::string> models = modelsData.get<std::map<std::string, std::string>>();
-
-    auto reluctanceModelName = defaults.reluctanceModelDefault;
-    if (models.find("reluctance") != models.end()) {
-        std::string modelNameJsonUpper = models["reluctance"];
-        std::transform(modelNameJsonUpper.begin(), modelNameJsonUpper.end(), modelNameJsonUpper.begin(), ::toupper);
-        reluctanceModelName = magic_enum::enum_cast<OpenMagnetics::ReluctanceModels>(modelNameJsonUpper).value();
-    }
-    auto coreLossesModelName = defaults.coreLossesModelDefault;
-    if (models.find("coreLosses") != models.end()) {
-        std::string modelNameJsonUpper = models["coreLosses"];
-        std::transform(modelNameJsonUpper.begin(), modelNameJsonUpper.end(), modelNameJsonUpper.begin(), ::toupper);
-        coreLossesModelName = magic_enum::enum_cast<OpenMagnetics::CoreLossesModels>(modelNameJsonUpper).value();
-    }
-    auto coreTemperatureModelName = defaults.coreTemperatureModelDefault;
-    if (models.find("coreTemperature") != models.end()) {
-        std::string modelNameJsonUpper = models["coreTemperature"];
-        std::transform(modelNameJsonUpper.begin(), modelNameJsonUpper.end(), modelNameJsonUpper.begin(), ::toupper);
-        coreTemperatureModelName = magic_enum::enum_cast<OpenMagnetics::CoreTemperatureModels>(modelNameJsonUpper).value();
-    }
-
-    OpenMagnetics::MagneticWrapper magnetic;
-    magnetic.set_core(core);
-    magnetic.set_coil(coil);
-
-    OpenMagnetics::MagneticSimulator magneticSimulator;
-    magneticSimulator.set_core_losses_model_name(coreLossesModelName);
-    magneticSimulator.set_core_temperature_model_name(coreTemperatureModelName);
-    magneticSimulator.set_reluctance_model_name(reluctanceModelName);
-    auto coreLossesOutput = magneticSimulator.calculate_core_losses(operatingPoint, magnetic);
-    json result;
-    to_json(result, coreLossesOutput);
-
-    OpenMagnetics::MagnetizingInductance magnetizingInductanceObj(reluctanceModelName);
-    auto magneticFluxDensity = magnetizingInductanceObj.calculate_inductance_and_magnetic_flux_density(core, coil, &operatingPoint).second;
-
-    result["magneticFluxDensityPeak"] = magneticFluxDensity.get_processed().value().get_peak().value();
-    result["magneticFluxDensityAcPeak"] = magneticFluxDensity.get_processed().value().get_peak().value() - magneticFluxDensity.get_processed().value().get_offset();
-    result["voltageRms"] = operatingPoint.get_mutable_excitations_per_winding()[0].get_voltage().value().get_processed().value().get_rms().value();
-    result["currentRms"] = operatingPoint.get_mutable_excitations_per_winding()[0].get_current().value().get_processed().value().get_rms().value();
-    result["apparentPower"] = operatingPoint.get_mutable_excitations_per_winding()[0].get_voltage().value().get_processed().value().get_rms().value() * operatingPoint.get_mutable_excitations_per_winding()[0].get_current().value().get_processed().value().get_rms().value();
-    if (coreLossesOutput.get_temperature()) {
-        result["maximumCoreTemperature"] = coreLossesOutput.get_temperature().value();
-        result["maximumCoreTemperatureRise"] = coreLossesOutput.get_temperature().value() - operatingPoint.get_conditions().get_ambient_temperature();
-    }
-
-    return result;
-}
-
+/**
+ * @brief Retrieves information about the gap reluctance model.
+ *
+ * This function gathers various pieces of information related to the gap reluctance model
+ * from the OpenMagnetics::ReluctanceModel class. The information includes general model
+ * information, errors, internal links, and external links.
+ *
+ * @return A JSON object containing the following keys:
+ * - "information": General information about the reluctance models.
+ * - "errors": Any errors associated with the reluctance models.
+ * - "internal_links": Internal links related to the reluctance models.
+ * - "external_links": External links related to the reluctance models.
+ */
+ */
 json get_core_losses_model_information(json material){
     json info;
     info["information"] = OpenMagnetics::CoreLossesModel::get_models_information();
@@ -1613,6 +1954,18 @@ json get_core_losses_model_information(json material){
     return info;
 }
 
+/**
+ * @brief Retrieves information about the core temperature models.
+ *
+ * This function gathers various details about the core temperature models, including general information,
+ * errors, internal links, and external links. The information is returned in a JSON object.
+ *
+ * @return json A JSON object containing the following keys:
+ * - "information": General information about the core temperature models.
+ * - "errors": Any errors related to the core temperature models.
+ * - "internal_links": Internal links related to the core temperature models.
+ * - "external_links": External links related to the core temperature models.
+ */
 json get_core_temperature_model_information(){
     json info;
     info["information"] = OpenMagnetics::CoreTemperatureModel::get_models_information();
@@ -1750,6 +2103,15 @@ double resolve_dimension_with_tolerance(json dimensionWithToleranceJson) {
     return OpenMagnetics::resolve_dimensional_values(dimensionWithTolerance);
 }
 
+/**
+ * @brief Calculate basic processed data from a given waveform JSON.
+ *
+ * This function takes a JSON object representing a waveform, processes it using
+ * the OpenMagnetics library, and returns the processed data as a JSON object.
+ *
+ * @param waveformJson A JSON object containing the waveform data to be processed.
+ * @return A JSON object containing the basic processed data.
+ */
 json calculate_basic_processed_data(json waveformJson) {
     OpenMagnetics::Waveform waveform(waveformJson);
     auto processed = OpenMagnetics::InputsWrapper::calculate_basic_processed_data(waveform);
@@ -1758,6 +2120,17 @@ json calculate_basic_processed_data(json waveformJson) {
     return result;
 }
 
+/**
+ * @brief Creates a waveform based on the given processed JSON data and frequency.
+ *
+ * This function takes a JSON object containing processed data and a frequency value,
+ * and generates a waveform using the OpenMagnetics library. The resulting waveform
+ * is then converted back to a JSON object and returned.
+ *
+ * @param processedJson A JSON object containing the processed data.
+ * @param frequency A double representing the frequency for the waveform.
+ * @return A JSON object representing the created waveform.
+ */
 json create_waveform(json processedJson, double frequency) {
     OpenMagnetics::Processed processed(processedJson);
     auto waveform = OpenMagnetics::InputsWrapper::create_waveform(processed, frequency);
@@ -1766,6 +2139,16 @@ json create_waveform(json processedJson, double frequency) {
     return result;
 }
 
+/**
+ * @brief Scales the time domain of a waveform to a specified frequency domain.
+ *
+ * This function takes a JSON representation of a waveform and scales its time domain
+ * to match a new specified frequency. The scaled waveform is then returned as a JSON object.
+ *
+ * @param waveformJson A JSON object representing the original waveform.
+ * @param newFrequency The new frequency to which the waveform's time domain should be scaled.
+ * @return A JSON object representing the scaled waveform.
+ */
 json scale_waveform_time_to_frequency(json waveformJson, double newFrequency) {
     OpenMagnetics::Waveform waveform(waveformJson);
     auto scaledWaveform = OpenMagnetics::InputsWrapper::scale_time_to_frequency(waveform, newFrequency);
@@ -1774,6 +2157,28 @@ json scale_waveform_time_to_frequency(json waveformJson, double newFrequency) {
     return result;
 }
 
+/**
+ * @brief Calculate various insulation parameters based on the provided JSON inputs.
+ *
+ * This function uses the OpenMagnetics::InsulationCoordinator to calculate several insulation-related
+ * parameters such as creepage distance, clearance, withstand voltage, and distance through insulation.
+ * The results are returned in a JSON object.
+ *
+ * @param inputsJson A JSON object containing the necessary inputs for the calculations.
+ * @return A JSON object containing the calculated insulation parameters and any error messages.
+ *
+ * The returned JSON object has the following structure:
+ * {
+ *     "creepageDistance": <calculated_value>,
+ *     "clearance": <calculated_value>,
+ *     "withstandVoltage": <calculated_value>,
+ *     "distanceThroughInsulation": <calculated_value>,
+ *     "errorMessage": <error_message_if_any>
+ * }
+ *
+ * If an exception occurs during the calculations, the "errorMessage" field will contain the
+ * corresponding error message.
+ */
 json calculate_insulation(json inputsJson){
     auto standard = OpenMagnetics::InsulationCoordinator();
     OpenMagnetics::InputsWrapper inputs(inputsJson, false);
@@ -1801,26 +2206,19 @@ json calculate_insulation(json inputsJson){
     return result;
 }
 
-json extract_operating_point(json fileJson, size_t numberWindings, double frequency, double desiredMagnetizingInductance, json mapColumnNamesJson){
-    try {
-        std::vector<std::map<std::string, std::string>> mapColumnNames = mapColumnNamesJson.get<std::vector<std::map<std::string, std::string>>>();
-        auto reader = OpenMagnetics::CircuitSimulationReader(fileJson);
-        auto operatingPoint = reader.extract_operating_point(numberWindings, frequency, mapColumnNames);
-        operatingPoint = OpenMagnetics::InputsWrapper::process_operating_point(operatingPoint, desiredMagnetizingInductance);
-        json result;
-        to_json(result, operatingPoint);
-        return result;
-    }
-    catch(...)
-    {
-        return "Error processing waveforms, please check column names and frequency";
-    }
-}
-
-json extract_map_column_names(json fileJson, size_t numberWindings, double frequency){
-    auto reader = OpenMagnetics::CircuitSimulationReader(fileJson);
-    auto columnNames = reader.extract_map_column_names(numberWindings, frequency);
-
+/**
+ * @brief Extracts the operating point from the given JSON file.
+ *
+ * This function reads the operating point from a JSON file, processes it with the given parameters,
+ * and returns the result as a JSON object.
+ *
+ * @param fileJson The JSON object containing the file data.
+ * @param numberWindings The number of windings in the circuit.
+ * @param frequency The frequency at which the circuit operates.
+ * @param desiredMagnetizingInductance The desired magnetizing inductance value.
+ * @param mapColumnNamesJson A JSON object containing the mapping of column names.
+ * @return A JSON object containing the processed operating point, or an error message if processing fails.
+ */
     json result = json::array();
     for (auto& columnName : columnNames) {
         json aux;
@@ -1832,6 +2230,16 @@ json extract_map_column_names(json fileJson, size_t numberWindings, double frequ
     return result;
 }
 
+/**
+ * @brief Extracts column names from a given JSON file.
+ *
+ * This function takes a JSON object representing a file, uses the 
+ * CircuitSimulationReader to read the file, and extracts the column names.
+ * The column names are then returned as a JSON array.
+ *
+ * @param fileJson A JSON object representing the file from which to extract column names.
+ * @return A JSON array containing the extracted column names.
+ */
 json extract_column_names(json fileJson){
     auto reader = OpenMagnetics::CircuitSimulationReader(fileJson);
     auto columnNames = reader.extract_column_names();
@@ -1843,6 +2251,17 @@ json extract_column_names(json fileJson){
     return result;
 }
 
+/**
+ * @brief Calculate the number of turns for a transformer design.
+ *
+ * This function calculates the number of turns for a transformer primary winding
+ * based on the given design requirements in JSON format. It uses the OpenMagnetics
+ * library to determine the next combination of turns.
+ *
+ * @param numberTurnsPrimary The number of turns in the primary winding.
+ * @param designRequirementsJson A JSON object containing the design requirements.
+ * @return A vector of integers representing the calculated number of turns.
+ */
 std::vector<int> calculate_number_turns(int numberTurnsPrimary, json designRequirementsJson){
     OpenMagnetics::DesignRequirements designRequirements(designRequirementsJson);
 
@@ -1856,54 +2275,33 @@ std::vector<int> calculate_number_turns(int numberTurnsPrimary, json designRequi
     return numberTurnsResult;
 }
 
+/**
+ * @brief Calculate the DC resistance per meter of a wire at a given temperature.
+ * 
+ * This function takes a JSON object representing the wire properties and a temperature value,
+ * and calculates the DC resistance per meter using the OpenMagnetics library.
+ * 
+ * @param wireJson A JSON object containing the wire properties.
+ * @param temperature The temperature at which to calculate the DC resistance.
+ * @return The DC resistance per meter of the wire at the given temperature.
+ */
 double calculate_dc_resistance_per_meter(json wireJson, double temperature){
     OpenMagnetics::WireWrapper wire(wireJson);
     auto dcResistancePerMeter = OpenMagnetics::WindingOhmicLosses::calculate_dc_resistance_per_meter(wire, temperature);
     return dcResistancePerMeter;
 }
 
-double calculate_dc_losses_per_meter(json wireJson, json currentJson, double temperature){
-    OpenMagnetics::WireWrapper wire(wireJson);
-    OpenMagnetics::SignalDescriptor current(currentJson);
-    auto dcLossesPerMeter = OpenMagnetics::WindingOhmicLosses::calculate_ohmic_losses_per_meter(wire, current, temperature);
-    return dcLossesPerMeter;
-}
-
-double calculate_skin_ac_factor(json wireJson, json currentJson, double temperature){
-    OpenMagnetics::WireWrapper wire(wireJson);
-    OpenMagnetics::SignalDescriptor current(currentJson);
-    auto dcLossesPerMeter = OpenMagnetics::WindingOhmicLosses::calculate_ohmic_losses_per_meter(wire, current, temperature);
-    auto [skinLossesPerMeter, _] = OpenMagnetics::WindingSkinEffectLosses::calculate_skin_effect_losses_per_meter(wire, current, temperature);
-    auto skinAcFactor = (skinLossesPerMeter + dcLossesPerMeter) / dcLossesPerMeter;
-    return skinAcFactor;
-}
-
-double calculate_skin_ac_losses_per_meter(json wireJson, json currentJson, double temperature){
-    OpenMagnetics::WireWrapper wire(wireJson);
-    OpenMagnetics::SignalDescriptor current(currentJson);
-    auto [skinLossesPerMeter, _] = OpenMagnetics::WindingSkinEffectLosses::calculate_skin_effect_losses_per_meter(wire, current, temperature);
-    return skinLossesPerMeter;
-}
-
-double calculate_skin_ac_resistance_per_meter(json wireJson, json currentJson, double temperature){
-    OpenMagnetics::WireWrapper wire(wireJson);
-    OpenMagnetics::SignalDescriptor current(currentJson);
-    auto dcLossesPerMeter = OpenMagnetics::WindingOhmicLosses::calculate_ohmic_losses_per_meter(wire, current, temperature);
-    auto [skinLossesPerMeter, _] = OpenMagnetics::WindingSkinEffectLosses::calculate_skin_effect_losses_per_meter(wire, current, temperature);
-    auto skinAcFactor = (skinLossesPerMeter + dcLossesPerMeter) / dcLossesPerMeter;
-    auto dcResistancePerMeter = OpenMagnetics::WindingOhmicLosses::calculate_dc_resistance_per_meter(wire, temperature);
-
-    return dcResistancePerMeter * skinAcFactor;
-}
-
-double calculate_effective_current_density(json wireJson, json currentJson, double temperature){
-    OpenMagnetics::WireWrapper wire(wireJson);
-    OpenMagnetics::SignalDescriptor current(currentJson);
-    auto effectiveCurrentDensity = wire.calculate_effective_current_density(current, temperature);
-
-    return effectiveCurrentDensity;
-}
-
+/**
+ * @brief Calculate the DC losses per meter for a given wire and current at a specified temperature.
+ * 
+ * @param wireJson A JSON object containing the wire specifications.
+ * @param currentJson A JSON object containing the current signal descriptor.
+ * @param temperature The temperature at which the losses are to be calculated.
+ * @return double The calculated DC losses per meter.
+ */
+ * 
+ * @throws std::runtime_error If the current signal descriptor is missing the effective frequency field.
+ */
 double calculate_effective_skin_depth(std::string materialName, json currentJson, double temperature){
     try {
         OpenMagnetics::SignalDescriptor current(currentJson);
@@ -1921,6 +2319,14 @@ double calculate_effective_skin_depth(std::string materialName, json currentJson
     }
 }
 
+/**
+ * @brief Retrieves a list of available winding orientations.
+ *
+ * This function iterates through all entries of the `OpenMagnetics::WindingOrientation` enum,
+ * converts each orientation to a JSON string, and adds it to a vector of strings.
+ *
+ * @return std::vector<std::string> A vector containing JSON string representations of all available winding orientations.
+ */
 std::vector<std::string> get_available_winding_orientations(){
     std::vector<std::string> orientations;
     for (auto& [orientation, _] : magic_enum::enum_entries<OpenMagnetics::WindingOrientation>()) {
@@ -1931,6 +2337,14 @@ std::vector<std::string> get_available_winding_orientations(){
     return orientations;
 }
 
+/**
+ * @brief Retrieves a list of available coil alignments.
+ *
+ * This function iterates through all entries of the OpenMagnetics::CoilAlignment enumeration,
+ * converts each alignment to a JSON string, and collects these strings into a vector.
+ *
+ * @return std::vector<std::string> A vector containing JSON string representations of the available coil alignments.
+ */
 std::vector<std::string> get_available_coil_alignments(){
     std::vector<std::string> orientations;
     for (auto& [orientation, _] : magic_enum::enum_entries<OpenMagnetics::CoilAlignment>()) {
@@ -1941,6 +2355,16 @@ std::vector<std::string> get_available_coil_alignments(){
     return orientations;
 }
 
+/**
+ * @brief Checks if a given value meets the specified requirement.
+ *
+ * This function takes a JSON object representing a requirement and a double value,
+ * and checks if the value meets the requirement using the OpenMagnetics library.
+ *
+ * @param requirementJson A JSON object containing the requirement details.
+ * @param value The value to be checked against the requirement.
+ * @return true if the value meets the requirement, false otherwise.
+ */
 bool check_requirement(json requirementJson, double value){
     try {
         OpenMagnetics::DimensionWithTolerance requirement(requirementJson);
@@ -1953,6 +2377,23 @@ bool check_requirement(json requirementJson, double value){
     }
 }
 
+/**
+ * @brief Function to wind a coil based on the provided JSON configuration.
+ *
+ * This function takes in various JSON objects describing the coil configuration, 
+ * including the coil's functional description, bobbin, margins, layers orientation, 
+ * and turns alignment. It then processes these configurations and winds the coil 
+ * accordingly, returning the resulting coil configuration as a JSON object.
+ *
+ * @param coilJson JSON object containing the coil's functional description and bobbin.
+ * @param repetitions Number of repetitions for the winding pattern.
+ * @param proportionPerWindingJson JSON array containing the proportion per winding.
+ * @param patternJson JSON array containing the winding pattern.
+ * @param marginPairsJson JSON array containing margin pairs.
+ * @return JSON object representing the resulting coil configuration.
+ *
+ * @throws std::runtime_error if the turns are not created successfully.
+ */
 json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json patternJson, json marginPairsJson) {
     try {
         std::vector<std::vector<double>> marginPairs;
@@ -2087,6 +2528,20 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
     }
 }
 
+/**
+ * @brief Generates a winding configuration for a coil based on the provided parameters.
+ * 
+ * This function configures a coil's winding based on the given JSON inputs for coil properties,
+ * winding proportions, and winding patterns. It supports different winding configurations
+ * depending on the presence of specific parameters.
+ * 
+ * @param coilJson A JSON object containing the coil's properties and functional description.
+ * @param repetitions The number of times the winding pattern should be repeated.
+ * @param proportionPerWindingJson A JSON array representing the proportion of each winding.
+ * @param patternJson A JSON array representing the winding pattern.
+ * 
+ * @return A JSON object representing the configured coil, or an error message in case of an exception.
+ */
 json wind_by_sections(json coilJson, size_t repetitions, json proportionPerWindingJson, json patternJson) {
     try {
 
@@ -2148,6 +2603,20 @@ json wind_by_sections(json coilJson, size_t repetitions, json proportionPerWindi
     }
 }
 
+/**
+ * @brief Processes coil and insulation layer data to generate a detailed coil description.
+ *
+ * This function takes JSON objects representing coil data and insulation layer data, processes them,
+ * and returns a JSON object with the detailed coil description, including insulation layers, functional
+ * description, and sections description.
+ *
+ * @param coilJson A JSON object containing the coil data, including functional description, sections description,
+ *                 and various coil properties such as interleaving level, winding orientation, layers orientation,
+ *                 turns alignment, section alignment, and bobbin.
+ * @param insulationLayersJson A JSON object containing the insulation layers data, where each key is a string
+ *                             representing a pair of winding indices, and each value is a JSON array of layers.
+ * @return A JSON object containing the detailed coil description, or an error message if an exception occurs.
+ */
 json wind_by_layers(json coilJson, json insulationLayersJson) {
     try {
         std::map<std::pair<size_t, size_t>, std::vector<OpenMagnetics::Layer>> insulationLayers;
@@ -2208,6 +2677,20 @@ json wind_by_layers(json coilJson, json insulationLayersJson) {
     }
 }
 
+
+/**
+ * @brief Winds a coil based on the provided JSON configuration.
+ *
+ * This function takes a JSON object containing the configuration for a coil,
+ * including its functional description, sections description, and layers description.
+ * It initializes a CoilWrapper object with these descriptions and additional parameters
+ * if they are present in the JSON. The coil is then wound by turns, and the resulting
+ * coil configuration is returned as a JSON object.
+ *
+ * @param coilJson A JSON object containing the coil configuration.
+ * @return A JSON object representing the wound coil configuration.
+ *         If an exception occurs, a JSON object with the exception message is returned.
+ */
 json wind_by_turns(json coilJson) {
     try {
 
@@ -2257,6 +2740,29 @@ json wind_by_turns(json coilJson) {
     }
 }
 
+
+/**
+ * @brief Processes a JSON object representing a coil, compacts its data, and returns the result as a JSON object.
+ *
+ * This function takes a JSON object containing various descriptions of a coil, processes them into their respective
+ * data structures, and then compacts the coil data using the `delimit_and_compact` method of the `CoilWrapper` class.
+ * The resulting compacted coil data is then converted back to a JSON object and returned.
+ *
+ * @param coilJson The input JSON object containing the coil descriptions. It should have the following structure:
+ * - "functionalDescription": Array of functional descriptions for the coil.
+ * - "sectionsDescription": Array of section descriptions for the coil.
+ * - "layersDescription": Array of layer descriptions for the coil.
+ * - "turnsDescription": Array of turn descriptions for the coil.
+ * - "_interleavingLevel" (optional): Interleaving level of the coil.
+ * - "_windingOrientation" (optional): Winding orientation of the coil.
+ * - "_layersOrientation" (optional): Layers orientation of the coil.
+ * - "_turnsAlignment" (optional): Turns alignment of the coil.
+ * - "_sectionAlignment" (optional): Section alignment of the coil.
+ * - "bobbin": Bobbin description of the coil.
+ *
+ * @return A JSON object containing the compacted coil data. If an exception occurs during processing, a JSON object
+ * containing the exception message is returned.
+ */
 json delimit_and_compact(json coilJson) {
     try {
 
@@ -2276,7 +2782,6 @@ json delimit_and_compact(json coilJson) {
         for (auto elem : coilJson["turnsDescription"]) {
             coilTurnsDescription.push_back(OpenMagnetics::Turn(elem));
         }
-
 
         OpenMagnetics::CoilWrapper coil;
 
@@ -2312,6 +2817,18 @@ json delimit_and_compact(json coilJson) {
     }
 }
 
+
+/**
+ * @brief Retrieves the layers of a coil by the specified winding index.
+ * 
+ * This function takes a JSON representation of a coil and an integer winding index,
+ * and returns a JSON array containing the layers associated with the given winding index.
+ * 
+ * @param coilJson A JSON object representing the coil.
+ * @param windingIndex An integer specifying the winding index for which layers are to be retrieved.
+ * @return A JSON array containing the layers for the specified winding index. If an exception occurs,
+ *         a JSON string with the exception message is returned.
+ */
 json get_layers_by_winding_index(json coilJson, int windingIndex){
     try {
         OpenMagnetics::CoilWrapper coil(coilJson);
@@ -2329,6 +2846,17 @@ json get_layers_by_winding_index(json coilJson, int windingIndex){
     }
 }
 
+/**
+* @brief Retrieves the layers of a coil by its section name.
+*
+* This function takes a JSON object representing a coil and a section name, extracts the layers
+* of the coil that belong to the specified section, and returns them as a JSON array.
+*
+* @param coilJson A JSON object representing the coil.
+* @param sectionName The name of the section to which the layers belong.
+*
+* @return A JSON array containing the layers of the coil that belong to the specified section.
+ */
 json get_layers_by_section(json coilJson, json sectionName){
     try {
         json result = json::array();
@@ -2345,6 +2873,16 @@ json get_layers_by_section(json coilJson, json sectionName){
     }
 }
 
+/**
+ * @brief Retrieves the description of conduction sections from a coil JSON object.
+ *
+ * This function takes a JSON object representing a coil, extracts the conduction
+ * sections descriptions, and returns them as a JSON array.
+ *
+ * @param coilJson A JSON object representing the coil.
+ * @return A JSON array containing the descriptions of the conduction sections.
+ *         If an exception occurs, a JSON object with the exception message is returned.
+ */
 json get_sections_description_conduction(json coilJson){
     try {
         json result = json::array();
@@ -2361,6 +2899,18 @@ json get_sections_description_conduction(json coilJson){
     }
 }
 
+/**
+ * @brief Checks if the sections and layers of a coil fit according to the provided JSON configuration.
+ *
+ * This function takes a JSON object representing the coil configuration and checks if the sections
+ * and layers of the coil fit properly. It uses the OpenMagnetics::CoilWrapper class to perform the
+ * check.
+ *
+ * @param coilJson A JSON object containing the coil configuration.
+ * @return true if the sections and layers fit properly, false otherwise.
+ *
+ * @throws std::exception if there is an error during the fitting check.
+ */
 bool are_sections_and_layers_fitting(json coilJson) {
     try {
         json result = json::array();
@@ -2373,6 +2923,20 @@ bool are_sections_and_layers_fitting(json coilJson) {
     }
 }
 
+/**
+ * @brief Adds margin to a specific section of a coil by its index.
+ * 
+ * This function takes a JSON representation of a coil, adds margin to a specified section
+ * by its index, and returns the updated JSON representation of the coil.
+ * 
+ * @param coilJson The JSON object representing the coil.
+ * @param sectionIndex The index of the section to which the margin will be added.
+ * @param top_or_left_margin The margin to be added to the top or left side of the section.
+ * @param bottom_or_right_margin The margin to be added to the bottom or right side of the section.
+ * @return json The updated JSON object representing the coil with the added margin.
+ * 
+ * @throws std::exception If an error occurs during the margin addition process.
+ */
 json add_margin_to_section_by_index(json coilJson, int sectionIndex, double top_or_left_margin, double bottom_or_right_margin) {
     try {
         OpenMagnetics::CoilWrapper coil(coilJson);
@@ -2387,6 +2951,20 @@ json add_margin_to_section_by_index(json coilJson, int sectionIndex, double top_
     }
 }
 
+/**
+ * @brief Simulates the magnetic behavior based on the provided inputs, magnetic properties, and model data.
+ * 
+ * @param inputsJson A JSON object containing the input parameters for the simulation.
+ * @param magneticJson A JSON object containing the magnetic properties for the simulation.
+ * @param modelsData A JSON object containing the model names to be used for the simulation.
+ * @return json A JSON object containing the simulation results.
+ * 
+ * This function initializes the magnetic and input wrappers using the provided JSON data. It then sets the default
+ * models for reluctance, core losses, and core temperature. If specific models are provided in the modelsData JSON,
+ * those models are used instead of the defaults. The function then creates a MagneticSimulator object, sets the
+ * model names, and performs the simulation. The results are converted to JSON and returned. If an exception occurs,
+ * an error message is returned.
+ */
 json simulate(json inputsJson,
                      json magneticJson,
                      json modelsData){
@@ -2434,6 +3012,20 @@ json simulate(json inputsJson,
     }
 }
 
+/**
+ * @brief Checks if a given dimension fits within a bobbin.
+ * 
+ * This function takes a JSON representation of a bobbin, a dimension, and a flag indicating 
+ * whether the dimension is horizontal or radial. It then checks if the given dimension fits 
+ * within the bobbin.
+ * 
+ * @param bobbinJson A JSON object representing the bobbin.
+ * @param dimension The dimension to check.
+ * @param isHorizontalOrRadial A boolean flag indicating whether the dimension is horizontal or radial.
+ * @return true if the dimension fits within the bobbin, false otherwise.
+ * 
+ * @throws std::exception If there is an error during the check.
+ */
 bool check_if_fits(json bobbinJson, double dimension, bool isHorizontalOrRadial) {
     try {
         OpenMagnetics::BobbinWrapper bobbin(bobbinJson);
@@ -2445,6 +3037,16 @@ bool check_if_fits(json bobbinJson, double dimension, bool isHorizontalOrRadial)
     }
 }
 
+/**
+ * @brief Retrieves the coating thickness of a wire from a JSON object.
+ *
+ * This function creates a WireWrapper object using the provided JSON data and
+ * returns the coating thickness of the wire. If an exception occurs during the
+ * process, it catches the exception, prints the error message, and returns -1.
+ *
+ * @param wireJson A JSON object containing the wire data.
+ * @return The coating thickness of the wire. Returns -1 if an exception occurs.
+ */
 double get_coating_thickness(json wireJson){
     try {
         OpenMagnetics::WireWrapper wire(wireJson);
@@ -2456,6 +3058,17 @@ double get_coating_thickness(json wireJson){
     }
 }
 
+/**
+ * @brief Retrieves the relative permittivity of the coating from the given wire JSON object.
+ * 
+ * This function attempts to create a WireWrapper object from the provided JSON representation
+ * of a wire and then retrieves the relative permittivity of its coating. If an exception occurs
+ * during this process, the exception message is printed to the standard output and the function
+ * returns -1.
+ * 
+ * @param wireJson A JSON object representing the wire.
+ * @return double The relative permittivity of the wire's coating, or -1 if an error occurs.
+ */
 double get_coating_relative_permittivity(json wireJson){
     try {
         OpenMagnetics::WireWrapper wire(wireJson);
@@ -2467,6 +3080,15 @@ double get_coating_relative_permittivity(json wireJson){
     }
 }
 
+/**
+ * @brief Retrieves the coating insulation material for a given wire.
+ *
+ * This function takes a JSON object representing a wire and attempts to resolve its coating insulation material.
+ * If the material information is missing, it defaults to a predefined enamelled insulation material.
+ *
+ * @param wireJson A JSON object containing the wire information.
+ * @return A JSON object representing the resolved insulation material. If an exception occurs, returns a JSON object with the exception message.
+ */
 json get_coating_insulation_material(json wireJson){
     try {
         OpenMagnetics::WireWrapper wire(wireJson);
@@ -2490,6 +3112,17 @@ json get_coating_insulation_material(json wireJson){
     }
 }
 
+/**
+ * @brief Retrieves the insulation material of a specified insulation layer from a coil JSON object.
+ *
+ * This function takes a JSON object representing a coil and a string specifying the name of an insulation layer.
+ * It returns the insulation material of the specified insulation layer in JSON format.
+ *
+ * @param coilJson A JSON object representing the coil.
+ * @param layerName A string specifying the name of the insulation layer.
+ * @return A JSON object representing the insulation material of the specified insulation layer.
+ *         If an exception occurs, a JSON object containing the exception message is returned.
+ */
 json get_insulation_layer_insulation_material(json coilJson, std::string layerName){
     try {
         OpenMagnetics::CoilWrapper coil(coilJson);
@@ -2504,7 +3137,17 @@ json get_insulation_layer_insulation_material(json coilJson, std::string layerNa
     }
 }
 
-
+/**
+ * @brief Exports a magnetic component as a subcircuit.
+ *
+ * This function takes a JSON representation of a magnetic component, wraps it using the 
+ * OpenMagnetics::MagneticWrapper, and then exports it as a subcircuit using the 
+ * OpenMagnetics::CircuitSimulatorExporter. The resulting subcircuit is returned as a 
+ * formatted JSON string.
+ *
+ * @param magneticJson A JSON object representing the magnetic component.
+ * @return A formatted JSON string representing the subcircuit, or an error message if an exception occurs.
+ */
 ordered_json export_magnetic_as_subcircuit(json magneticJson) {
     try {
         OpenMagnetics::MagneticWrapper magnetic(magneticJson);
