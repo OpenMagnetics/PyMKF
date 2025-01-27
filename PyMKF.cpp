@@ -473,6 +473,25 @@ json find_wire_material_by_name(json wireMaterialName) {
     }
 }
 
+
+json find_wire_by_dimension(double dimension, json wireTypeJson, json wireStandardJson) {
+    try {
+        OpenMagnetics::WireType wireType;
+        from_json(wireTypeJson, wireType);
+        OpenMagnetics::WireStandard wireStandard;
+        from_json(wireStandardJson, wireStandard);
+        auto wireMaterialData = OpenMagnetics::find_wire_by_dimension(dimension, wireType, wireStandard, false);
+        json result;
+        to_json(result, wireMaterialData);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        json exception;
+        exception["data"] = "Exception: " + std::string{exc.what()};
+        return exception;
+    }
+}
+
 json create_basic_bobbin(json coreDataJson, bool nullDimensions){
     try {
         OpenMagnetics::CoreWrapper core(coreDataJson, false, false, false);
@@ -2079,10 +2098,16 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
         return result;
     }
     catch (const std::exception &exc) {
+        std::cout << "coilJson" << std::endl;
         std::cout << coilJson << std::endl;
+        std::cout << "repetitions" << std::endl;
         std::cout << repetitions << std::endl;
+        std::cout << "proportionPerWindingJson" << std::endl;
         std::cout << proportionPerWindingJson << std::endl;
+        std::cout << "patternJson" << std::endl;
         std::cout << patternJson << std::endl;
+        std::cout << "marginPairsJson" << std::endl;
+        std::cout << marginPairsJson << std::endl;
         return "Exception: " + std::string{exc.what()};
     }
 }
@@ -2519,6 +2544,62 @@ ordered_json export_magnetic_as_subcircuit(json magneticJson) {
 }
 
 
+json process_inputs(json inputsJson){
+    OpenMagnetics::InputsWrapper inputs(inputsJson, true);
+    json result;
+    to_json(result, inputs);
+    return result;
+}
+
+size_t load_core_materials(std::string fileToLoad){
+    if (fileToLoad != "") {
+        OpenMagnetics::load_core_materials(fileToLoad);
+    }
+    else {
+        OpenMagnetics::load_core_materials();
+    }
+
+    return coreMaterialDatabase.size();
+}
+
+size_t load_core_shapes(std::string fileToLoad){
+    if (fileToLoad != "") {
+        OpenMagnetics::load_core_shapes(true, fileToLoad);
+    }
+    else {
+        OpenMagnetics::load_core_shapes();
+    }
+    return coreShapeDatabase.size();
+}
+
+size_t load_wires(std::string fileToLoad){
+    if (fileToLoad != "") {
+        OpenMagnetics::load_wires(fileToLoad);
+    }
+    else {
+        OpenMagnetics::load_wires();
+    }
+    return wireDatabase.size();
+}
+
+void clear_databases(){
+    OpenMagnetics::clear_databases();
+}
+
+bool is_core_material_database_empty(){
+    return coreMaterialDatabase.size() == 0;
+}
+
+bool is_core_shape_database_empty(){
+    return coreShapeDatabase.size() == 0;
+}
+
+bool is_wire_database_empty(){
+    return wireDatabase.size() == 0;
+}
+
+
+
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
     m.def("get_defaults", &get_defaults, "");
@@ -2545,6 +2626,7 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("find_bobbin_by_name", &find_bobbin_by_name, "");
     m.def("find_insulation_material_by_name", &find_insulation_material_by_name, "");
     m.def("find_wire_material_by_name", &find_wire_material_by_name, "");
+    m.def("find_wire_by_dimension", &find_wire_by_dimension, "");
     m.def("create_basic_bobbin", &create_basic_bobbin, "");
     m.def("calculate_core_data", &calculate_core_data, "");
     m.def("calculate_core_processed_description", &calculate_core_processed_description, "");
@@ -2653,4 +2735,12 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("get_coating_insulation_material", &get_coating_insulation_material, "");
     m.def("get_insulation_layer_insulation_material", &get_insulation_layer_insulation_material, "");
     m.def("export_magnetic_as_subcircuit", &export_magnetic_as_subcircuit, "");
+    m.def("process_inputs", &process_inputs, "");
+    m.def("load_core_materials", &load_core_materials, "");
+    m.def("load_core_shapes", &load_core_shapes, "");
+    m.def("load_wires", &load_wires, "");
+    m.def("clear_databases", &clear_databases, "");
+    m.def("is_core_material_database_empty", &is_core_material_database_empty, "");
+    m.def("is_core_shape_database_empty", &is_core_shape_database_empty, "");
+    m.def("is_wire_database_empty", &is_wire_database_empty, "");
 }
