@@ -13,8 +13,10 @@
 #include <MAS.hpp>
 #include "Defaults.h"
 #include "Constants.h"
+#include "MagneticEnergy.h"
 #include "MagneticWrapper.h"
 #include "Reluctance.h"
+#include "Temperature.h"
 #include "MagnetizingInductance.h"
 #include "CoreLosses.h"
 #include "MagneticSimulator.h"
@@ -2009,16 +2011,18 @@ double calculate_number_turns_from_gapping_and_inductance(json coreData,
 
 
 json calculate_gapping_from_number_turns_and_inductance(json coreData,
-                                                               json coilData,
-                                                               json inputsData,
-                                                               std::string gappingTypeJson,
-                                                               int decimals,
-                                                               json modelsData){
+                                                        json coilData,
+                                                        json inputsData,
+                                                        std::string gappingTypeJson,
+                                                        int decimals,
+                                                        json modelsData){
+
     OpenMagnetics::CoreWrapper core(coreData);
     OpenMagnetics::CoilWrapper coil(coilData);
     OpenMagnetics::InputsWrapper inputs(inputsData);
 
     std::map<std::string, std::string> models = modelsData.get<std::map<std::string, std::string>>();
+    std::transform(gappingTypeJson.begin(), gappingTypeJson.end(), gappingTypeJson.begin(), ::toupper);
     OpenMagnetics::GappingType gappingType = magic_enum::enum_cast<OpenMagnetics::GappingType>(gappingTypeJson).value();
     
     auto reluctanceModelName = OpenMagnetics::Defaults().reluctanceModelDefault;
@@ -3469,6 +3473,46 @@ bool is_wire_database_empty(){
     return wireDatabase.size() == 0;
 }
 
+json get_isolation_side_from_index(size_t index){
+    return OpenMagnetics::get_isolation_side_from_index(index);
+}
+
+double calculate_core_maximum_magnetic_energy(json coreDataJson, json operatingPointJson){
+    try {
+        OpenMagnetics::OperatingPoint operatingPoint = OpenMagnetics::OperatingPoint(operatingPointJson);
+        OpenMagnetics::CoreWrapper core = OpenMagnetics::CoreWrapper(coreDataJson, false, false, false);
+        if (!core.get_processed_description()) {
+            core.process_data();
+            core.process_gap();
+        }
+
+        auto magneticEnergy = OpenMagnetics::MagneticEnergy({});
+
+        double coreMaximumMagneticEnergy;
+        if (operatingPoint.get_excitations_per_winding().size() == 0) {
+            coreMaximumMagneticEnergy = magneticEnergy.calculate_core_maximum_magnetic_energy(core, nullptr);
+        }
+        else {
+            coreMaximumMagneticEnergy = magneticEnergy.calculate_core_maximum_magnetic_energy(core, &operatingPoint);
+        }
+        return coreMaximumMagneticEnergy;
+    }
+    catch (const std::exception &exc) {
+        std::cout << "Exception: " + std::string{exc.what()} << std::endl;
+        return -1;
+    }
+}
+
+double calculate_saturation_current(json magneticJson, double temperature) {
+    OpenMagnetics::MagneticWrapper magnetic(magneticJson);
+    return magnetic.calculate_saturation_current(temperature);
+}
+
+double calculate_temperature_from_core_thermal_resistance(json coreJson, double totalLosses) {
+    OpenMagnetics::CoreWrapper core(coreJson);
+    return OpenMagnetics::Temperature::calculate_temperature_from_core_thermal_resistance(core, totalLosses);
+}
+
 
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
@@ -3613,4 +3657,8 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("is_core_material_database_empty", &is_core_material_database_empty, "");
     m.def("is_core_shape_database_empty", &is_core_shape_database_empty, "");
     m.def("is_wire_database_empty", &is_wire_database_empty, "");
+    m.def("get_isolation_side_from_index", &get_isolation_side_from_index, "");
+    m.def("calculate_core_maximum_magnetic_energy", &calculate_core_maximum_magnetic_energy, "");
+    m.def("calculate_saturation_current", &calculate_saturation_current, "");
+    m.def("calculate_temperature_from_core_thermal_resistance", &calculate_temperature_from_core_thermal_resistance, "");
 }
