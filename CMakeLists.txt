@@ -21,7 +21,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0")
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 else ()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-deprecated-declarations -Wno-implicit-function-declaration -Wno-unused-parameter -Wno-switch")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-deprecated-declarations -Wno-unused-parameter -Wno-switch")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -44,14 +44,6 @@ message(STATUS MKF_DIR)
 message(STATUS ${MKF_DIR})
 
 include(FetchContent)
-
-message("Using for Levmar: ${CMAKE_BINARY_DIR}/_deps/levmar-2.6")
-file(DOWNLOAD https://users.ics.forth.gr/~lourakis/levmar/levmar-2.6.tgz ${CMAKE_BINARY_DIR}/_deps/levmar-2.6.tgz SHOW_PROGRESS)
-execute_process(COMMAND ${CMAKE_COMMAND} -E tar -xzvf ${CMAKE_BINARY_DIR}/_deps/levmar-2.6.tgz)
-execute_process(COMMAND ${CMAKE_COMMAND} -E rename levmar-2.6 ${CMAKE_BINARY_DIR}/_deps/levmar-2.6)
-execute_process(COMMAND ${CMAKE_COMMAND} -E rename levmar-2.6 ${CMAKE_BINARY_DIR}/_deps/levmar-2.6)
-add_subdirectory("${CMAKE_BINARY_DIR}/_deps/levmar-2.6" "${CMAKE_BINARY_DIR}/_deps/levmar-2.6")
-include_directories("${CMAKE_BINARY_DIR}/_deps/levmar-2.6")
 
 message(STATUS "Fetching https://github.com/nlohmann/json.git")
 FetchContent_Declare(json
@@ -80,6 +72,12 @@ FetchContent_Declare(spline
     GIT_REPOSITORY https://github.com/AlfVII/spline.git)
 FetchContent_MakeAvailable(spline)
 include_directories("${CMAKE_BINARY_DIR}/_deps/spline-src/src")
+    
+FetchContent_Declare(levmar
+    GIT_REPOSITORY https://github.com/AlfVII/levmar.git
+    GIT_TAG main)
+FetchContent_MakeAvailable(levmar)
+include_directories("${CMAKE_BINARY_DIR}/_deps/levmar-src")
 
 message(STATUS "Fetching magic-enum")
 FetchContent_Declare(magic-enum
@@ -153,7 +151,6 @@ add_dependencies(PyMKF PyMASGeneration)
 FetchContent_MakeAvailable(magic-enum)
 
 target_link_libraries(PyMKF PUBLIC nlohmann_json::nlohmann_json matplot levmar)
-ADD_DEPENDENCIES(PyMKF levmar)
 
 file(DOWNLOAD "https://raw.githubusercontent.com/vector-of-bool/cmrc/master/CMakeRC.cmake"
                  "${CMAKE_BINARY_DIR}/CMakeRC.cmake")
