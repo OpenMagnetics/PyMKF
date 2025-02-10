@@ -1591,6 +1591,25 @@ json get_equivalent_wire(json oldWireJson, json newWireTypeJson, double effectiv
     }
 }
 
+json get_coating(json wireJson){
+    try {
+        OpenMagnetics::WireWrapper wire(wireJson);
+        OpenMagnetics::InsulationWireCoating insulationWireCoating;
+        if (wire.resolve_coating()) {
+            insulationWireCoating = wire.resolve_coating().value();
+        }
+        else {
+            insulationWireCoating.set_type(OpenMagnetics::InsulationWireCoatingType::BARE);
+        }
+        json result;
+        to_json(result, insulationWireCoating);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
 json get_coating_label(json wireJson){
     try {
         OpenMagnetics::WireWrapper wire(wireJson);
@@ -3513,7 +3532,6 @@ double calculate_temperature_from_core_thermal_resistance(json coreJson, double 
     return OpenMagnetics::Temperature::calculate_temperature_from_core_thermal_resistance(core, totalLosses);
 }
 
-
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
     m.def("get_defaults", &get_defaults, "");
@@ -3661,4 +3679,5 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("calculate_core_maximum_magnetic_energy", &calculate_core_maximum_magnetic_energy, "");
     m.def("calculate_saturation_current", &calculate_saturation_current, "");
     m.def("calculate_temperature_from_core_thermal_resistance", &calculate_temperature_from_core_thermal_resistance, "");
+    m.def("get_coating", &get_coating, "");
 }
