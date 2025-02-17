@@ -3531,6 +3531,23 @@ double calculate_temperature_from_core_thermal_resistance(json coreJson, double 
     OpenMagnetics::CoreWrapper core(coreJson);
     return OpenMagnetics::Temperature::calculate_temperature_from_core_thermal_resistance(core, totalLosses);
 }
+json calculate_signal_from_harmonics(json harmonicsJson, double frequency) {
+    OpenMagnetics::Harmonics harmonics;
+    OpenMagnetics::from_json(harmonicsJson, harmonics);
+
+    auto waveform = OpenMagnetics::InputsWrapper::reconstruct_signal(harmonics, frequency);
+    auto processed = OpenMagnetics::InputsWrapper::calculate_processed_data(harmonics, waveform, true);
+
+
+    OpenMagnetics::SignalDescriptor signal;
+    signal.set_processed(processed);
+    signal.set_waveform(waveform);
+    signal.set_harmonics(harmonics);
+
+    json result;
+    to_json(result, signal);
+    return result;
+}
 
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
@@ -3587,6 +3604,7 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("get_settings", &get_settings, "");
     m.def("reset_settings", &reset_settings, "");
     m.def("calculate_harmonics", &calculate_harmonics, "");
+    m.def("calculate_signal_from_harmonics", &calculate_signal_from_harmonics, "");
     m.def("calculate_processed", &calculate_processed, "");
     m.def("calculate_bobbin_data", &calculate_bobbin_data, "");
     m.def("get_wire_data", &get_wire_data, "");
