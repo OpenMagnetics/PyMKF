@@ -8,6 +8,7 @@
 #include "CoreWrapper.h"
 #include "CoilWrapper.h"
 #include "WireWrapper.h"
+#include "MasWrapper.h"
 #include "InitialPermeability.h"
 #include "InputsWrapper.h"
 #include <MAS.hpp>
@@ -43,6 +44,186 @@ using ordered_json = nlohmann::ordered_json;
 #define MACRO_STRINGIFY(x) STRINGIFY(x) 
 
 namespace py = pybind11;
+
+
+std::map<std::string, OpenMagnetics::MasWrapper> masDatabase;
+
+void load_databases(json databasesJson) {
+    OpenMagnetics::load_databases(databasesJson, true);
+}
+
+std::string read_databases(std::string path, bool addInternalData) {
+    try {
+        auto masPath = std::filesystem::path{path};
+        json data;
+        std::string line;
+        {
+            data["coreMaterials"] = json();
+            std::ifstream coreMaterials(masPath.append("core_materials.ndjson"));
+            while (getline (coreMaterials, line)) {
+                json jf = json::parse(line);
+                data["coreMaterials"][jf["name"]] = jf;
+            }
+        }
+        {
+            data["coreShapes"] = json();
+            std::ifstream coreMaterials(masPath.append("core_shapes.ndjson"));
+            while (getline (coreMaterials, line)) {
+                json jf = json::parse(line);
+                data["coreShapes"][jf["name"]] = jf;
+            }
+        }
+        {
+            data["wires"] = json();
+            std::ifstream coreMaterials(masPath.append("wires.ndjson"));
+            while (getline (coreMaterials, line)) {
+                json jf = json::parse(line);
+                data["wires"][jf["name"]] = jf;
+            }
+        }
+        {
+            data["bobbins"] = json();
+            std::ifstream coreMaterials(masPath.append("bobbins.ndjson"));
+            while (getline (coreMaterials, line)) {
+                json jf = json::parse(line);
+                data["bobbins"][jf["name"]] = jf;
+            }
+        }
+        {
+            data["insulationMaterials"] = json();
+            std::ifstream coreMaterials(masPath.append("insulation_materials.ndjson"));
+            while (getline (coreMaterials, line)) {
+                json jf = json::parse(line);
+                data["insulationMaterials"][jf["name"]] = jf;
+            }
+        }
+        {
+            data["wireMaterials"] = json();
+            std::ifstream coreMaterials(masPath.append("wire_materials.ndjson"));
+            while (getline (coreMaterials, line)) {
+                json jf = json::parse(line);
+                data["wireMaterials"][jf["name"]] = jf;
+            }
+        }
+        OpenMagnetics::load_databases(data, true, addInternalData);
+        return "0";
+    }
+    catch (const std::exception &exc) {
+        return std::string{exc.what()};
+    }
+}
+
+std::string load_mas(std::string key, json masJson, bool expand) {
+    try {
+        OpenMagnetics::MasWrapper mas(masJson);
+        if (expand) {
+            mas.set_magnetic(OpenMagnetics::MasWrapper::expand_magnetic(mas.get_mutable_magnetic()));
+            mas.set_inputs(OpenMagnetics::MasWrapper::expand_inputs(mas.get_mutable_magnetic(), mas.get_mutable_inputs()));
+        }
+        masDatabase[key] = mas;
+        return std::to_string(masDatabase.size());
+    }
+    catch (const std::exception &exc) {
+        return std::string{exc.what()};
+    }
+}
+
+std::string load_magnetic(std::string key, json magneticJson, bool expand) {
+    try {
+        OpenMagnetics::MagneticWrapper magnetic(magneticJson);
+        if (expand) {
+            magnetic = OpenMagnetics::MasWrapper::expand_magnetic(magnetic);
+        }
+        OpenMagnetics::MasWrapper mas;
+        mas.set_magnetic(magnetic);
+        masDatabase[key] = mas;
+        return std::to_string(masDatabase.size());
+    }
+    catch (const std::exception &exc) {
+        return std::string{exc.what()};
+    }
+}
+
+
+std::string load_magnetics(std::string keys, json magneticJsons, bool expand) {
+    try {
+        json keysJson = json::parse(keys);
+        for (size_t magneticIndex = 0; magneticIndex < magneticJsons.size(); magneticIndex++) {
+            OpenMagnetics::MagneticWrapper magnetic(magneticJsons[magneticIndex]);
+            if (expand) {
+                magnetic = OpenMagnetics::MasWrapper::expand_magnetic(magnetic);
+            }
+            OpenMagnetics::MasWrapper mas;
+            mas.set_magnetic(magnetic);
+            masDatabase[to_string(keysJson[magneticIndex])] = mas;
+        }
+        return std::to_string(masDatabase.size());
+    }
+    catch (const std::exception &exc) {
+        return std::string{exc.what()};
+    }
+}
+
+// std::string load_magnetics_from_file(std::string path, char separator, size_t magneticIndex, size_t referenceIndex, std::string manufacturerName, bool expand) {
+//     try {
+//         std::ifstream in(path);
+//         // OpenMagnetics::InputsWrapper inputs(inputsJson);
+
+//         bool isHeader = true;
+
+//         std::cout << "Mierda 1" << std::endl;
+//         if (in) {
+//             std::string line;
+//         std::cout << "Mierda 2" << std::endl;
+
+//             while (getline(in, line)) {
+
+//                 if (isHeader) {
+//                     std::cout << "isHeader" << std::endl;
+//                     isHeader = false;
+//                     continue;
+//                 }
+
+//                 std::stringstream sep(line);
+//                 std::string field;
+//         std::cout << "Mierda 3" << std::endl;
+
+//                 std::vector<std::string> row_data;
+
+//                 while (getline(sep, field, separator)) {
+//         std::cout << field << std::endl;
+//                     row_data.push_back(field);
+//                 }
+//         std::cout << "Mierda 4" << std::endl;
+
+//                 OpenMagnetics::MagneticWrapper magnetic(json::parse(row_data[magneticIndex]));
+//                 OpenMagnetics::MagneticManufacturerInfo manufacturerInfo;
+//                 manufacturerInfo.set_name(manufacturerName);
+//                 manufacturerInfo.set_reference(row_data[referenceIndex]);
+//                 magnetic.set_manufacturer_info(manufacturerInfo);
+//                 if (expand) {
+//                     magnetic = OpenMagnetics::MasWrapper::expand_magnetic(magnetic);
+//                     // inputs = OpenMagnetics::MasWrapper::expand_inputs(magnetic, inputs);
+//                 }
+//                 OpenMagnetics::MasWrapper mas;
+//                 mas.set_magnetic(magnetic);
+//                 // mas.set_inputs(inputs);
+//                 masDatabase[row_data[referenceIndex]] = mas;
+//             }
+//         }
+//         return std::to_string(masDatabase.size());
+//     }
+//     catch (const std::exception &exc) {
+//         return std::string{exc.what()};
+//     }
+// }
+
+json read_mas(std::string key) {
+    json result;
+    to_json(result, masDatabase[key]);
+    return result;
+}
+
 
 
 /**
@@ -131,8 +312,10 @@ py::dict get_defaults() {
     defaultsMap["measurementFrequency"] = defaults.measurementFrequency;
     defaultsMap["magneticFieldMirroringDimension"] = defaults.magneticFieldMirroringDimension;
     defaultsMap["maximumCoilPattern"] = defaults.maximumCoilPattern;
-    to_json(aux, defaults.defaultSectionsOrientation);
-    defaultsMap["defaultSectionsOrientation"] = aux;
+    to_json(aux, defaults.defaultRoundWindowSectionsOrientation);
+    defaultsMap["defaultRoundWindowSectionsOrientation"] = aux;
+    to_json(aux, defaults.defaultRectangularWindowSectionsOrientation);
+    defaultsMap["defaultRectangularWindowSectionsOrientation"] = aux;
     defaultsMap["defaultEnamelledInsulationMaterial"] = defaults.defaultEnamelledInsulationMaterial;
     defaultsMap["defaultInsulationMaterial"] = defaults.defaultInsulationMaterial;
     defaultsMap["defaultLayerInsulationMaterial"] = defaults.defaultLayerInsulationMaterial;
@@ -959,7 +1142,7 @@ json calculate_winding_losses(json magneticJson, json operatingPointJson, double
 
 json calculate_ohmic_losses(json coilJson, json operatingPointJson, double temperature) {
     try {
-        OpenMagnetics::CoilWrapper coil(coilJson);
+        OpenMagnetics::CoilWrapper coil(coilJson, false);
         OpenMagnetics::OperatingPoint operatingPoint(operatingPointJson);
 
         auto windingLossesOutput = OpenMagnetics::WindingOhmicLosses::calculate_ohmic_losses(coil, operatingPoint, temperature);
@@ -996,7 +1179,7 @@ json calculate_magnetic_field_strength_field(json operatingPointJson, json magne
 
 json calculate_proximity_effect_losses(json coilJson, double temperature, json windingLossesOutputJson, json windingWindowMagneticStrengthFieldOutputJson) {
     try {
-        OpenMagnetics::CoilWrapper coil(coilJson);
+        OpenMagnetics::CoilWrapper coil(coilJson, false);
         OpenMagnetics::WindingLossesOutput windingLossesOutput(windingLossesOutputJson);
         OpenMagnetics::WindingWindowMagneticStrengthFieldOutput windingWindowMagneticStrengthFieldOutput(windingWindowMagneticStrengthFieldOutputJson);
 
@@ -1015,7 +1198,7 @@ json calculate_proximity_effect_losses(json coilJson, double temperature, json w
 
 json calculate_skin_effect_losses(json coilJson, json windingLossesOutputJson, double temperature) {
     try {
-        OpenMagnetics::CoilWrapper coil(coilJson);
+        OpenMagnetics::CoilWrapper coil(coilJson, false);
         OpenMagnetics::WindingLossesOutput windingLossesOutput(windingLossesOutputJson);
 
         auto windingLossesOutputOutput = OpenMagnetics::WindingSkinEffectLosses::calculate_skin_effect_losses(coil, temperature, windingLossesOutput);
@@ -3107,7 +3290,7 @@ json delimit_and_compact(json coilJson) {
  */
 json get_layers_by_winding_index(json coilJson, int windingIndex){
     try {
-        OpenMagnetics::CoilWrapper coil(coilJson);
+        OpenMagnetics::CoilWrapper coil(coilJson, false);
 
         json result = json::array();
         for (auto& layer : coil.get_layers_by_winding_index(windingIndex)) {
@@ -3136,7 +3319,7 @@ json get_layers_by_winding_index(json coilJson, int windingIndex){
 json get_layers_by_section(json coilJson, json sectionName){
     try {
         json result = json::array();
-        OpenMagnetics::CoilWrapper coil(coilJson);
+        OpenMagnetics::CoilWrapper coil(coilJson, false);
         for (auto& layer : coil.get_layers_by_section(sectionName)) {
             json aux;
             to_json(aux, layer);
@@ -3162,7 +3345,7 @@ json get_layers_by_section(json coilJson, json sectionName){
 json get_sections_description_conduction(json coilJson){
     try {
         json result = json::array();
-        OpenMagnetics::CoilWrapper coil(coilJson);
+        OpenMagnetics::CoilWrapper coil(coilJson, false);
         for (auto& section : coil.get_sections_description_conduction()) {
             json aux;
             to_json(aux, section);
@@ -3190,7 +3373,7 @@ json get_sections_description_conduction(json coilJson){
 bool are_sections_and_layers_fitting(json coilJson) {
     try {
         json result = json::array();
-        OpenMagnetics::CoilWrapper coil(coilJson);
+        OpenMagnetics::CoilWrapper coil(coilJson, false);
         return coil.are_sections_and_layers_fitting();
     }
     catch (const std::exception &exc) {
@@ -3215,7 +3398,7 @@ bool are_sections_and_layers_fitting(json coilJson) {
  */
 json add_margin_to_section_by_index(json coilJson, int sectionIndex, double top_or_left_margin, double bottom_or_right_margin) {
     try {
-        OpenMagnetics::CoilWrapper coil(coilJson);
+        OpenMagnetics::CoilWrapper coil(coilJson, false);
         coil.add_margin_to_section_by_index(sectionIndex, {top_or_left_margin, bottom_or_right_margin});
 
         json result;
@@ -3401,7 +3584,7 @@ json get_coating_insulation_material(json wireJson){
  */
 json get_insulation_layer_insulation_material(json coilJson, std::string layerName){
     try {
-        OpenMagnetics::CoilWrapper coil(coilJson);
+        OpenMagnetics::CoilWrapper coil(coilJson, false);
         auto material = OpenMagnetics::CoilWrapper::resolve_insulation_layer_insulation_material(coil, layerName);
 
         json result;
@@ -3698,4 +3881,11 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("calculate_saturation_current", &calculate_saturation_current, "");
     m.def("calculate_temperature_from_core_thermal_resistance", &calculate_temperature_from_core_thermal_resistance, "");
     m.def("get_coating", &get_coating, "");
+    m.def("load_databases", &load_databases, "");
+    m.def("read_databases", &read_databases, "");
+    m.def("load_mas", &load_mas, "");
+    m.def("load_magnetic", &load_magnetic, "");
+    m.def("load_magnetics", &load_magnetics, "");
+    // m.def("load_magnetics_from_file", &load_magnetics_from_file, "");
+    m.def("read_mas", &read_mas, "");
 }
