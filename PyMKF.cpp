@@ -2043,6 +2043,36 @@ std::vector<std::string> get_available_core_shapes(){
     return OpenMagnetics::get_shape_names();
 }
 
+
+/**
+ * @brief Retrieves a list of available cores.
+ *
+ * This function calls the OpenMagnetics::get_shape_names() function to obtain
+ * a vector of strings representing the names of available cores.
+ *
+ * @return std::vector<std::string> A vector containing the names of available cores.
+ */
+json get_available_cores(){
+    if (coreMaterialDatabase.empty()) {
+        OpenMagnetics::load_cores();
+    }
+
+    try {
+        json result = json::array();
+        for (auto elem : coreDatabase) {
+            json aux;
+            OpenMagnetics::to_json(aux, elem);
+            result.push_back(aux);
+        }
+        return result;
+    }
+    catch (const std::exception &exc) {
+        json exception;
+        exception["data"] = "Exception: " + std::string{exc.what()};
+        return exception;
+    }
+}
+
 /**
  * @brief Retrieves a list of available wire names.
  * 
@@ -3817,6 +3847,7 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("get_available_core_manufacturers", &get_available_core_manufacturers, "");
     m.def("get_available_core_shape_families", &get_available_core_shape_families, "");
     m.def("get_available_core_shapes", &get_available_core_shapes, "");
+    m.def("get_available_cores", &get_available_cores, "");
     m.def("get_available_wires", &get_available_wires, "");
     m.def("get_unique_wire_diameters", &get_unique_wire_diameters, "");
     m.def("get_available_wire_types", &get_available_wire_types, "");
