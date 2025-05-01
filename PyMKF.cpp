@@ -238,7 +238,6 @@ json read_mas(std::string key) {
  * - "minimumNonResidualGap": The minimum non-residual gap value.
  * - "vacuumPermeability": The permeability of vacuum.
  * - "vacuumPermittivity": The permittivity of vacuum.
- * - "magneticFluxDensitySaturation": The saturation magnetic flux density.
  * - "spacerProtudingPercentage": The percentage of spacer protruding.
  * - "coilPainterScale": The scale factor for coil painting.
  * - "minimumDistributedFringingFactor": The minimum distributed fringing factor.
@@ -255,7 +254,6 @@ py::dict get_constants() {
     constantsMap["minimumNonResidualGap"] = constants.minimumNonResidualGap;
     constantsMap["vacuumPermeability"] = constants.vacuumPermeability;
     constantsMap["vacuumPermittivity"] = constants.vacuumPermittivity;
-    constantsMap["magneticFluxDensitySaturation"] = constants.magneticFluxDensitySaturation;
     constantsMap["spacerProtudingPercentage"] = constants.spacerProtudingPercentage;
     constantsMap["coilPainterScale"] = constants.coilPainterScale;
     constantsMap["minimumDistributedFringingFactor"] = constants.minimumDistributedFringingFactor;
