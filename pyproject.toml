@@ -26,7 +26,8 @@ Repository = "https://github.com/OpenMagnetics/PyMKF"
 Contact = "https://www.linkedin.com/in/alfonso-martinez-de-la-torre/"
 
 [tool.scikit-build]
-build-dir = "build/{wheel_tag}"
+# build-dir = "build/{wheel_tag}"
+build-dir = "/tmp/pymkf/build/ea"
 cmake.verbose = true
 # build.tool-args = ["-j8"]
 
