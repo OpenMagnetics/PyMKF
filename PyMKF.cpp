@@ -3741,6 +3741,36 @@ json calculate_signal_from_harmonics(json harmonicsJson, double frequency) {
     return result;
 }
 
+json mas_autocomplete(json masJson, json configuration) {
+    try {
+        OpenMagnetics::Mas mas(masJson);
+        auto autocompletedMas = mas_autocomplete(mas, true, configuration);
+
+        json result;
+        to_json(result, autocompletedMas);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        std::cout << "Exception: " + std::string{exc.what()} << std::endl;
+        return -1;
+    }
+}
+
+json magnetic_autocomplete(json magneticJson, json configuration) {
+    try {
+        OpenMagnetics::Magnetic magnetic(magneticJson);
+        auto autocompletedMagnetic = magnetic_autocomplete(magnetic, configuration);
+
+        json result;
+        to_json(result, autocompletedMagnetic);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        std::cout << "Exception: " + std::string{exc.what()} << std::endl;
+        return -1;
+    }
+}
+
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
     m.def("get_defaults", &get_defaults, "");
@@ -3898,4 +3928,6 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("load_magnetics", &load_magnetics, "");
     // m.def("load_magnetics_from_file", &load_magnetics_from_file, "");
     m.def("read_mas", &read_mas, "");
+    m.def("mas_autocomplete", &mas_autocomplete, "");
+    m.def("magnetic_autocomplete", &magnetic_autocomplete, "");
 }
