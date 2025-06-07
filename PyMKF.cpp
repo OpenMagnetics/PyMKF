@@ -114,8 +114,8 @@ std::string load_mas(std::string key, json masJson, bool expand) {
     try {
         OpenMagnetics::Mas mas(masJson);
         if (expand) {
-            mas.set_magnetic(OpenMagnetics::Mas::expand_magnetic(mas.get_mutable_magnetic()));
-            mas.set_inputs(OpenMagnetics::Mas::expand_inputs(mas.get_mutable_magnetic(), mas.get_mutable_inputs()));
+            mas.set_magnetic(OpenMagnetics::magnetic_autocomplete(mas.get_mutable_magnetic()));
+            mas.set_inputs(OpenMagnetics::inputs_autocomplete(mas.get_mutable_inputs(), mas.get_mutable_magnetic()));
         }
         masDatabase[key] = mas;
         return std::to_string(masDatabase.size());
@@ -129,7 +129,7 @@ std::string load_magnetic(std::string key, json magneticJson, bool expand) {
     try {
         OpenMagnetics::Magnetic magnetic(magneticJson);
         if (expand) {
-            magnetic = OpenMagnetics::Mas::expand_magnetic(magnetic);
+            magnetic = OpenMagnetics::magnetic_autocomplete(magnetic);
         }
         OpenMagnetics::Mas mas;
         mas.set_magnetic(magnetic);
@@ -148,7 +148,7 @@ std::string load_magnetics(std::string keys, json magneticJsons, bool expand) {
         for (size_t magneticIndex = 0; magneticIndex < magneticJsons.size(); magneticIndex++) {
             OpenMagnetics::Magnetic magnetic(magneticJsons[magneticIndex]);
             if (expand) {
-                magnetic = OpenMagnetics::Mas::expand_magnetic(magnetic);
+                magnetic = OpenMagnetics::magnetic_autocomplete(magnetic);
             }
             OpenMagnetics::Mas mas;
             mas.set_magnetic(magnetic);
@@ -3771,6 +3771,27 @@ json magnetic_autocomplete(json magneticJson, json configuration) {
     }
 }
 
+json calculate_steinmetz_coefficients(json dataJson, json rangesJson) {
+    try {
+        std::vector<std::pair<double, double>> ranges;
+        for (auto rangeJson : rangesJson) {
+            std::pair<double, double> range{rangeJson[0], rangeJson[1]};
+            ranges.push_back(range);
+        }
+        std::vector<VolumetricLossesPoint> data(dataJson);
+
+        auto [coefficientsPerRange, errorPerRange] = OpenMagnetics::CoreLossesSteinmetzModel::calculate_steinmetz_coefficients(data, ranges);
+
+        json result;
+        to_json(result, coefficientsPerRange);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
+
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
     m.def("get_defaults", &get_defaults, "");
@@ -3930,4 +3951,5 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("read_mas", &read_mas, "");
     m.def("mas_autocomplete", &mas_autocomplete, "");
     m.def("magnetic_autocomplete", &magnetic_autocomplete, "");
+    m.def("calculate_steinmetz_coefficients", &calculate_steinmetz_coefficients, "");
 }
