@@ -1592,9 +1592,23 @@ json calculate_bobbin_data(json magneticJson){
             }
         }
         else {
-            bobbin = OpenMagnetics::Bobbin(std::get<std::string>(optionalBobbin));
+            bobbin = OpenMagnetics::Bobbin(std::get<OpenMagnetics::Bobbin>(optionalBobbin));
             bobbin.process_data();
         }
+
+        json result;
+        to_json(result, bobbin);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
+json process_bobbin(json bobbinJson){
+    try {
+        OpenMagnetics::Bobbin bobbin(bobbinJson);
+        bobbin.process_data();
 
         json result;
         to_json(result, bobbin);
@@ -3850,6 +3864,7 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("calculate_signal_from_harmonics", &calculate_signal_from_harmonics, "");
     m.def("calculate_processed", &calculate_processed, "");
     m.def("calculate_bobbin_data", &calculate_bobbin_data, "");
+    m.def("process_bobbin", &process_bobbin, "");
     m.def("get_wire_data", &get_wire_data, "");
     m.def("get_wire_data_by_name", &get_wire_data_by_name, "");
     m.def("get_wire_data_by_standard_name", &get_wire_data_by_standard_name, "");
