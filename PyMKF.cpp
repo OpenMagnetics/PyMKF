@@ -2898,11 +2898,11 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
         coil.set_bobbin(coilJson["bobbin"]);
         coil.set_functional_description(coilFunctionalDescription);
         coil.preload_margins(marginPairs);
-        if (coilJson.contains("_layersOrientation")) {
+        if (coilJson.contains("layersOrientation")) {
 
-            if (coilJson["_layersOrientation"].is_object()) {
+            if (coilJson["layersOrientation"].is_object()) {
                 std::map<std::string, WindingOrientation> layersOrientationPerSection;
-                for (auto [key, value] : coilJson["_layersOrientation"].items()) {
+                for (auto [key, value] : coilJson["layersOrientation"].items()) {
                     layersOrientationPerSection[key] = value;
                 }
 
@@ -2910,13 +2910,13 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
                     coil.set_layers_orientation(layerOrientation, sectionName);
                 }
             }
-            else if (coilJson["_layersOrientation"].is_array()) {
+            else if (coilJson["layersOrientation"].is_array()) {
                 coil.wind_by_sections(proportionPerWinding, pattern, repetitions);
                 if (coil.get_sections_description()) {
                     auto sections = coil.get_sections_description_conduction();
 
                     std::vector<WindingOrientation> layersOrientationPerSection;
-                    for (auto elem : coilJson["_layersOrientation"]) {
+                    for (auto elem : coilJson["layersOrientation"]) {
                         layersOrientationPerSection.push_back(WindingOrientation(elem));
                     }
 
@@ -2928,16 +2928,16 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
                 }
             }
             else {
-                WindingOrientation layerOrientation(coilJson["_layersOrientation"]);
+                WindingOrientation layerOrientation(coilJson["layersOrientation"]);
                 coil.set_layers_orientation(layerOrientation);
 
             }
         }
 
-        if (coilJson.contains("_turnsAlignment")) {
-            if (coilJson["_turnsAlignment"].is_object()) {
+        if (coilJson.contains("turnsAlignment")) {
+            if (coilJson["turnsAlignment"].is_object()) {
                 std::map<std::string, CoilAlignment> turnsAlignmentPerSection;
-                for (auto [key, value] : coilJson["_turnsAlignment"].items()) {
+                for (auto [key, value] : coilJson["turnsAlignment"].items()) {
                     turnsAlignmentPerSection[key] = value;
                 }
 
@@ -2946,13 +2946,13 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
                     coil.set_turns_alignment(turnsAlignment, sectionName);
                 }
             }
-            else if (coilJson["_turnsAlignment"].is_array()) {
+            else if (coilJson["turnsAlignment"].is_array()) {
                 coil.wind_by_sections(proportionPerWinding, pattern, repetitions);
                 if (coil.get_sections_description()) {
                     auto sections = coil.get_sections_description_conduction();
 
                     std::vector<CoilAlignment> turnsAlignmentPerSection;
-                    for (auto elem : coilJson["_turnsAlignment"]) {
+                    for (auto elem : coilJson["turnsAlignment"]) {
                         turnsAlignmentPerSection.push_back(CoilAlignment(elem));
                     }
 
@@ -2964,7 +2964,7 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
                 }
             }
             else {
-                CoilAlignment turnsAlignment(coilJson["_turnsAlignment"]);
+                CoilAlignment turnsAlignment(coilJson["turnsAlignment"]);
                 coil.set_turns_alignment(turnsAlignment);
             }
         }
@@ -3029,7 +3029,7 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
  * 
  * @return A JSON object representing the configured coil, or an error message in case of an exception.
  */
-json wind_by_sections(json coilJson, size_t repetitions, json proportionPerWindingJson, json patternJson) {
+json wind_by_sections(json coilJson, size_t repetitions, json proportionPerWindingJson, json patternJson, double insulationThickness) {
     try {
 
         std::vector<double> proportionPerWinding = proportionPerWindingJson;
@@ -3040,24 +3040,29 @@ json wind_by_sections(json coilJson, size_t repetitions, json proportionPerWindi
         }
         OpenMagnetics::Coil coil;
 
-        if (coilJson.contains("_interleavingLevel")) {
-            coil.set_interleaving_level(coilJson["_interleavingLevel"]);
+        if (coilJson.contains("interleavingLevel")) {
+            coil.set_interleaving_level(coilJson["interleavingLevel"]);
         }
-        if (coilJson.contains("_windingOrientation")) {
-            coil.set_winding_orientation(coilJson["_windingOrientation"]);
+        if (coilJson.contains("windingOrientation")) {
+            coil.set_winding_orientation(coilJson["windingOrientation"]);
         }
-        if (coilJson.contains("_layersOrientation")) {
-            coil.set_layers_orientation(coilJson["_layersOrientation"]);
+        if (coilJson.contains("layersOrientation")) {
+            coil.set_layers_orientation(coilJson["layersOrientation"]);
         }
-        if (coilJson.contains("_turnsAlignment")) {
-            coil.set_turns_alignment(coilJson["_turnsAlignment"]);
+        if (coilJson.contains("turnsAlignment")) {
+            coil.set_turns_alignment(coilJson["turnsAlignment"]);
         }
-        if (coilJson.contains("_sectionAlignment")) {
-            coil.set_section_alignment(coilJson["_sectionAlignment"]);
+        if (coilJson.contains("sectionAlignment")) {
+            coil.set_section_alignment(coilJson["sectionAlignment"]);
         }
 
         coil.set_bobbin(coilJson["bobbin"]);
         coil.set_functional_description(coilFunctionalDescription);
+
+        if (insulationThickness > 0) {
+            coil.calculate_custom_thickness_insulation(insulationThickness);
+        }
+
         if (proportionPerWinding.size() == coilFunctionalDescription.size()) {
             if (pattern.size() > 0 && repetitions > 0) {
                 coil.wind_by_sections(proportionPerWinding, pattern, repetitions);
@@ -3104,7 +3109,7 @@ json wind_by_sections(json coilJson, size_t repetitions, json proportionPerWindi
  *                             representing a pair of winding indices, and each value is a JSON array of layers.
  * @return A JSON object containing the detailed coil description, or an error message if an exception occurs.
  */
-json wind_by_layers(json coilJson, json insulationLayersJson) {
+json wind_by_layers(json coilJson, json insulationLayersJson, double insulationThickness) {
     try {
         std::map<std::pair<size_t, size_t>, std::vector<Layer>> insulationLayers;
 
@@ -3129,25 +3134,28 @@ json wind_by_layers(json coilJson, json insulationLayersJson) {
         }
         OpenMagnetics::Coil coil;
 
+        if (insulationThickness > 0) {
+            coil.calculate_custom_thickness_insulation(insulationThickness);
+        }
 
         if (insulationLayers.size() > 0) {
             coil.set_insulation_layers(insulationLayers);
         }
 
-        if (coilJson.contains("_interleavingLevel")) {
-            coil.set_interleaving_level(coilJson["_interleavingLevel"]);
+        if (coilJson.contains("interleavingLevel")) {
+            coil.set_interleaving_level(coilJson["interleavingLevel"]);
         }
-        if (coilJson.contains("_windingOrientation")) {
-            coil.set_winding_orientation(coilJson["_windingOrientation"]);
+        if (coilJson.contains("windingOrientation")) {
+            coil.set_winding_orientation(coilJson["windingOrientation"]);
         }
-        if (coilJson.contains("_layersOrientation")) {
-            coil.set_layers_orientation(coilJson["_layersOrientation"]);
+        if (coilJson.contains("layersOrientation")) {
+            coil.set_layers_orientation(coilJson["layersOrientation"]);
         }
-        if (coilJson.contains("_turnsAlignment")) {
-            coil.set_turns_alignment(coilJson["_turnsAlignment"]);
+        if (coilJson.contains("turnsAlignment")) {
+            coil.set_turns_alignment(coilJson["turnsAlignment"]);
         }
-        if (coilJson.contains("_sectionAlignment")) {
-            coil.set_section_alignment(coilJson["_sectionAlignment"]);
+        if (coilJson.contains("sectionAlignment")) {
+            coil.set_section_alignment(coilJson["sectionAlignment"]);
         }
 
         coil.set_bobbin(coilJson["bobbin"]);
@@ -3195,20 +3203,20 @@ json wind_by_turns(json coilJson) {
 
         OpenMagnetics::Coil coil;
 
-        if (coilJson.contains("_interleavingLevel")) {
-            coil.set_interleaving_level(coilJson["_interleavingLevel"]);
+        if (coilJson.contains("interleavingLevel")) {
+            coil.set_interleaving_level(coilJson["interleavingLevel"]);
         }
-        if (coilJson.contains("_windingOrientation")) {
-            coil.set_winding_orientation(coilJson["_windingOrientation"]);
+        if (coilJson.contains("windingOrientation")) {
+            coil.set_winding_orientation(coilJson["windingOrientation"]);
         }
-        if (coilJson.contains("_layersOrientation")) {
-            coil.set_layers_orientation(coilJson["_layersOrientation"]);
+        if (coilJson.contains("layersOrientation")) {
+            coil.set_layers_orientation(coilJson["layersOrientation"]);
         }
-        if (coilJson.contains("_turnsAlignment")) {
-            coil.set_turns_alignment(coilJson["_turnsAlignment"]);
+        if (coilJson.contains("turnsAlignment")) {
+            coil.set_turns_alignment(coilJson["turnsAlignment"]);
         }
-        if (coilJson.contains("_sectionAlignment")) {
-            coil.set_section_alignment(coilJson["_sectionAlignment"]);
+        if (coilJson.contains("sectionAlignment")) {
+            coil.set_section_alignment(coilJson["sectionAlignment"]);
         }
 
         coil.set_bobbin(coilJson["bobbin"]);
@@ -3238,11 +3246,11 @@ json wind_by_turns(json coilJson) {
  * - "sectionsDescription": Array of section descriptions for the coil.
  * - "layersDescription": Array of layer descriptions for the coil.
  * - "turnsDescription": Array of turn descriptions for the coil.
- * - "_interleavingLevel" (optional): Interleaving level of the coil.
- * - "_windingOrientation" (optional): Winding orientation of the coil.
- * - "_layersOrientation" (optional): Layers orientation of the coil.
- * - "_turnsAlignment" (optional): Turns alignment of the coil.
- * - "_sectionAlignment" (optional): Section alignment of the coil.
+ * - "interleavingLevel" (optional): Interleaving level of the coil.
+ * - "windingOrientation" (optional): Winding orientation of the coil.
+ * - "layersOrientation" (optional): Layers orientation of the coil.
+ * - "turnsAlignment" (optional): Turns alignment of the coil.
+ * - "sectionAlignment" (optional): Section alignment of the coil.
  * - "bobbin": Bobbin description of the coil.
  *
  * @return A JSON object containing the compacted coil data. If an exception occurs during processing, a JSON object
@@ -3270,20 +3278,20 @@ json delimit_and_compact(json coilJson) {
 
         OpenMagnetics::Coil coil;
 
-        if (coilJson.contains("_interleavingLevel")) {
-            coil.set_interleaving_level(coilJson["_interleavingLevel"]);
+        if (coilJson.contains("interleavingLevel")) {
+            coil.set_interleaving_level(coilJson["interleavingLevel"]);
         }
-        if (coilJson.contains("_windingOrientation")) {
-            coil.set_winding_orientation(coilJson["_windingOrientation"]);
+        if (coilJson.contains("windingOrientation")) {
+            coil.set_winding_orientation(coilJson["windingOrientation"]);
         }
-        if (coilJson.contains("_layersOrientation")) {
-            coil.set_layers_orientation(coilJson["_layersOrientation"]);
+        if (coilJson.contains("layersOrientation")) {
+            coil.set_layers_orientation(coilJson["layersOrientation"]);
         }
-        if (coilJson.contains("_turnsAlignment")) {
-            coil.set_turns_alignment(coilJson["_turnsAlignment"]);
+        if (coilJson.contains("turnsAlignment")) {
+            coil.set_turns_alignment(coilJson["turnsAlignment"]);
         }
-        if (coilJson.contains("_sectionAlignment")) {
-            coil.set_section_alignment(coilJson["_sectionAlignment"]);
+        if (coilJson.contains("sectionAlignment")) {
+            coil.set_section_alignment(coilJson["sectionAlignment"]);
         }
 
         coil.set_bobbin(coilJson["bobbin"]);
@@ -3792,7 +3800,11 @@ json calculate_steinmetz_coefficients(json dataJson, json rangesJson) {
             std::pair<double, double> range{rangeJson[0], rangeJson[1]};
             ranges.push_back(range);
         }
-        std::vector<VolumetricLossesPoint> data(dataJson);
+        std::vector<VolumetricLossesPoint> data;
+        for (auto datumJson : dataJson) {
+            VolumetricLossesPoint datum(datumJson);
+            data.push_back(datum);
+        }
 
         auto [coefficientsPerRange, errorPerRange] = OpenMagnetics::CoreLossesSteinmetzModel::calculate_steinmetz_coefficients(data, ranges);
 
