@@ -1396,6 +1396,7 @@ json get_settings() {
         settingsJson["coilWindEvenIfNotFit"] = settings->get_coil_wind_even_if_not_fit();
         settingsJson["coilDelimitAndCompact"] = settings->get_coil_delimit_and_compact();
         settingsJson["coilTryRewind"] = settings->get_coil_try_rewind();
+        settingsJson["coilOnlyOneTurnPerLayerInContiguousRectangular"] = settings->get_coil_only_one_turn_per_layer_in_contiguous_rectangular();
         settingsJson["useOnlyCoresInStock"] = settings->get_use_only_cores_in_stock();
         settingsJson["painterNumberPointsX"] = settings->get_painter_number_points_x();
         settingsJson["painterNumberPointsY"] = settings->get_painter_number_points_y();
@@ -1439,6 +1440,7 @@ void set_settings(json settingsJson) {
     settings->set_coil_wind_even_if_not_fit(settingsJson["coilWindEvenIfNotFit"]);
     settings->set_coil_delimit_and_compact(settingsJson["coilDelimitAndCompact"]);
     settings->set_coil_try_rewind(settingsJson["coilTryRewind"]);
+    settings->set_coil_only_one_turn_per_layer_in_contiguous_rectangular(settingsJson["coilOnlyOneTurnPerLayerInContiguousRectangular"]);
     settings->set_painter_mode(settingsJson["painterMode"]);
     settings->set_use_only_cores_in_stock(settingsJson["useOnlyCoresInStock"]);
     settings->set_painter_number_points_x(settingsJson["painterNumberPointsX"]);
