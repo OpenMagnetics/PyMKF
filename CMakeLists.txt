@@ -79,6 +79,11 @@ FetchContent_Declare(levmar
 FetchContent_MakeAvailable(levmar)
 include_directories("${CMAKE_BINARY_DIR}/_deps/levmar-src")
 
+FetchContent_Declare(svg
+    GIT_REPOSITORY https://github.com/AlfVII/svg)
+FetchContent_MakeAvailable(svg)
+include_directories("${CMAKE_BINARY_DIR}/_deps/svg-src/src")
+
 message(STATUS "Fetching magic-enum")
 FetchContent_Declare(magic-enum
     GIT_REPOSITORY https://github.com/Neargye/magic_enum.git

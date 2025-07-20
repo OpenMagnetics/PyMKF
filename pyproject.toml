@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "PyMKF"
-version = "0.9.34"
+version = "0.9.36"
 requires-python = ">=3.8"
 authors = [
   { name="Alfonso Martinez", email="Alfonso_VII@hotmail.com" },
@@ -32,10 +32,10 @@ cmake.verbose = true
 
 [[tool.scikit-build.overrides]]
 if.platform-system = "^linux"
-build.tool-args = ["-j8"]
+# build.tool-args = ["-j8"]
 [[tool.scikit-build.overrides]]
 if.platform-system = "^win32"
-build.tool-args = ["-maxcpucount:8"]
+# build.tool-args = ["-maxcpucount:8"]
 
 [tool.cibuildwheel]
 skip=["pp*", "*-win32", "*mul*"]

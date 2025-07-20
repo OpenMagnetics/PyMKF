@@ -1062,8 +1062,6 @@ json calculate_advised_cores(json inputsJson, json weightsJson, int maximumNumbe
         for (auto const& pair : weightsKeysJson) {
             weights[magic_enum::enum_cast<OpenMagnetics::CoreAdviser::CoreAdviserFilters>(pair.first).value()] = pair.second;
         }
-        weights[OpenMagnetics::CoreAdviser::CoreAdviserFilters::AREA_PRODUCT] = 1;
-        weights[OpenMagnetics::CoreAdviser::CoreAdviserFilters::ENERGY_STORED] = 1;
         weights[OpenMagnetics::CoreAdviser::CoreAdviserFilters::COST] = 1;
         weights[OpenMagnetics::CoreAdviser::CoreAdviserFilters::EFFICIENCY] = 1;
         weights[OpenMagnetics::CoreAdviser::CoreAdviserFilters::DIMENSIONS] = 1;
