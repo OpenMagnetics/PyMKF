@@ -3817,6 +3817,33 @@ json calculate_steinmetz_coefficients(json dataJson, json rangesJson) {
     }
 }
 
+json calculate_steinmetz_coefficients_with_error(json dataJson, json rangesJson) {
+    try {
+        std::vector<std::pair<double, double>> ranges;
+        for (auto rangeJson : rangesJson) {
+            std::pair<double, double> range{rangeJson[0], rangeJson[1]};
+            ranges.push_back(range);
+        }
+        std::vector<VolumetricLossesPoint> data;
+        for (auto datumJson : dataJson) {
+            VolumetricLossesPoint datum(datumJson);
+            data.push_back(datum);
+        }
+
+        auto [coefficientsPerRange, errorPerRange] = OpenMagnetics::CoreLossesSteinmetzModel::calculate_steinmetz_coefficients(data, ranges);
+
+        json aux;
+        to_json(aux, coefficientsPerRange);
+        json result;
+        result["coefficientsPerRange"] = aux;
+        result["errorPerRange"] = errorPerRange;
+        return result;
+    }
+    catch (const std::exception &exc) {
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
 
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
@@ -3979,4 +4006,5 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("mas_autocomplete", &mas_autocomplete, "");
     m.def("magnetic_autocomplete", &magnetic_autocomplete, "");
     m.def("calculate_steinmetz_coefficients", &calculate_steinmetz_coefficients, "");
+    m.def("calculate_steinmetz_coefficients_with_error", &calculate_steinmetz_coefficients_with_error, "");
 }
