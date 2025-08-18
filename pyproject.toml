@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "PyMKF"
-version = "0.9.37"
+version = "0.9.38"
 requires-python = ">=3.8"
 authors = [
   { name="Alfonso Martinez", email="Alfonso_VII@hotmail.com" },
@@ -26,16 +26,16 @@ Repository = "https://github.com/OpenMagnetics/PyMKF"
 Contact = "https://www.linkedin.com/in/alfonso-martinez-de-la-torre/"
 
 [tool.scikit-build]
-# build-dir = "build/{wheel_tag}"
-build-dir = "/tmp/pymkf/build/ea"
+build-dir = "build/{wheel_tag}"
 cmake.verbose = true
 
 [[tool.scikit-build.overrides]]
 if.platform-system = "^linux"
 build.tool-args = ["-j8"]
+build-dir = "/tmp/pymkf/build/ea"
 [[tool.scikit-build.overrides]]
 if.platform-system = "^win32"
-# build.tool-args = ["-maxcpucount:8"]
+build.tool-args = ["-maxcpucount:8"]
 
 [tool.cibuildwheel]
 skip=["pp*", "*-win32", "*mul*"]

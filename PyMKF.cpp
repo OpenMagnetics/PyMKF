@@ -970,6 +970,23 @@ json create_basic_bobbin(json coreDataJson, bool nullDimensions){
     }
 }
 
+json create_basic_bobbin_by_thickness(json coreDataJson, double thickness){
+    try {
+        OpenMagnetics::Core core(coreDataJson, false, false, false);
+        auto bobbin = OpenMagnetics::Bobbin::create_quick_bobbin(core, thickness);
+
+        json result;
+        to_json(result, bobbin);
+        return result;
+    }
+    catch (const std::exception &exc) {
+        json exception;
+        exception["data"] = "Exception: " + std::string{exc.what()};
+        return exception;
+    }
+}
+
+
 
 /**
  * @brief Processes core data and returns the processed description.
@@ -3873,6 +3890,7 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("find_wire_material_by_name", &find_wire_material_by_name, "");
     m.def("find_wire_by_dimension", &find_wire_by_dimension, "");
     m.def("create_basic_bobbin", &create_basic_bobbin, "");
+    m.def("create_basic_bobbin_by_thickness", &create_basic_bobbin_by_thickness, "");
     m.def("calculate_core_data", &calculate_core_data, "");
     m.def("calculate_core_processed_description", &calculate_core_processed_description, "");
     m.def("calculate_core_geometrical_description", &calculate_core_geometrical_description, "");
