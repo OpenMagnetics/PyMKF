@@ -1070,22 +1070,24 @@ json get_default_models() {
     }
 }
 
-json calculate_advised_cores(json inputsJson, json weightsJson, int maximumNumberResults, bool useOnlyCoresInStock){
+json calculate_advised_cores(json inputsJson, json weightsJson, int maximumNumberResults, json coreModeJson){
     try {
         OpenMagnetics::Inputs inputs(inputsJson);
+        OpenMagnetics::CoreAdviser::CoreAdviserModes coreMode;
+        from_json(coreModeJson, coreMode);
         std::map<std::string, double> weightsKeysJson = weightsJson;
         std::map<OpenMagnetics::CoreAdviser::CoreAdviserFilters, double> weights;
 
-        for (auto const& pair : weightsKeysJson) {
-            weights[magic_enum::enum_cast<OpenMagnetics::CoreAdviser::CoreAdviserFilters>(pair.first).value()] = pair.second;
-        }
         weights[OpenMagnetics::CoreAdviser::CoreAdviserFilters::COST] = 1;
         weights[OpenMagnetics::CoreAdviser::CoreAdviserFilters::EFFICIENCY] = 1;
         weights[OpenMagnetics::CoreAdviser::CoreAdviserFilters::DIMENSIONS] = 1;
 
-        settings->set_use_only_cores_in_stock(useOnlyCoresInStock);
+        for (auto const& pair : weightsKeysJson) {
+            weights[magic_enum::enum_cast<OpenMagnetics::CoreAdviser::CoreAdviserFilters>(pair.first).value()] = pair.second;
+        }
 
         OpenMagnetics::CoreAdviser coreAdviser;
+        coreAdviser.set_mode(coreMode);
         auto masMagnetics = coreAdviser.get_advised_core(inputs, weights, maximumNumberResults);
 
         json results = json::array();
@@ -1105,11 +1107,15 @@ json calculate_advised_cores(json inputsJson, json weightsJson, int maximumNumbe
     }
 }
 
-json calculate_advised_magnetics(json inputsJson, int maximumNumberResults){
+
+json calculate_advised_magnetics(json inputsJson, int maximumNumberResults, json coreModeJson){
     try {
         OpenMagnetics::Inputs inputs(inputsJson);
+        OpenMagnetics::CoreAdviser::CoreAdviserModes coreMode;
+        from_json(coreModeJson, coreMode);
 
         OpenMagnetics::MagneticAdviser magneticAdviser;
+        magneticAdviser.set_core_mode(coreMode);
         auto masMagnetics = magneticAdviser.get_advised_magnetic(inputs, maximumNumberResults);
 
         json results = json::array();
@@ -1413,6 +1419,8 @@ json get_settings() {
         settingsJson["coilTryRewind"] = settings->get_coil_try_rewind();
         settingsJson["coilOnlyOneTurnPerLayerInContiguousRectangular"] = settings->get_coil_only_one_turn_per_layer_in_contiguous_rectangular();
         settingsJson["useOnlyCoresInStock"] = settings->get_use_only_cores_in_stock();
+        settingsJson["coilMaximumLayersPlanar"] = settings->get_coil_maximum_layers_planar();
+
         settingsJson["painterNumberPointsX"] = settings->get_painter_number_points_x();
         settingsJson["painterNumberPointsY"] = settings->get_painter_number_points_y();
         settingsJson["painterMode"] = settings->get_painter_mode();
@@ -1456,6 +1464,8 @@ void set_settings(json settingsJson) {
     settings->set_coil_delimit_and_compact(settingsJson["coilDelimitAndCompact"]);
     settings->set_coil_try_rewind(settingsJson["coilTryRewind"]);
     settings->set_coil_only_one_turn_per_layer_in_contiguous_rectangular(settingsJson["coilOnlyOneTurnPerLayerInContiguousRectangular"]);
+    settings->set_coil_maximum_layers_planar(settingsJson["coilMaximumLayersPlanar"]);
+
     settings->set_painter_mode(settingsJson["painterMode"]);
     settings->set_use_only_cores_in_stock(settingsJson["useOnlyCoresInStock"]);
     settings->set_painter_number_points_x(settingsJson["painterNumberPointsX"]);
@@ -3032,6 +3042,28 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
     }
 }
 
+json wind_planar(json coilJson, json stackUpJson, double borderToWireDistance, json wireToWireDistanceJson, json insulationThicknessJson, double coreToLayerDistance) {
+    try {
+        settings->set_coil_wind_even_if_not_fit(true);
+        auto coil = OpenMagnetics::Coil(coilJson, false);
+        std::vector<size_t> stackUp = stackUpJson;
+        std::map<std::pair<size_t, size_t>, double> insulationThickness = insulationThicknessJson.get<std::map<std::pair<size_t, size_t>, double>>();
+        std::map<size_t, double> wireToWireDistance = wireToWireDistanceJson.get<std::map<size_t, double>>();
+
+        coil.set_strict(false);
+        coil.wind_planar(stackUp, borderToWireDistance, wireToWireDistance, insulationThickness, coreToLayerDistance);
+
+        if (!coil.get_turns_description()) {
+            throw std::runtime_error("Turns not created");
+        }
+
+        return coil;
+    }
+    catch (const std::exception &exc) {
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
 /**
  * @brief Generates a winding configuration for a coil based on the provided parameters.
  * 
@@ -3985,6 +4017,7 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("get_available_winding_orientations", &get_available_winding_orientations, "");
     m.def("get_available_coil_alignments", &get_available_coil_alignments, "");
     m.def("check_requirement", &check_requirement, "");
+    m.def("wind_planar", &wind_planar, "");
     m.def("wind_by_sections", &wind_by_sections, "");
     m.def("wind_by_layers", &wind_by_layers, "");
     m.def("wind_by_turns", &wind_by_turns, "");
