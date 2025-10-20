@@ -597,7 +597,7 @@ json get_wire_materials() {
 /**
  * @brief Retrieves the names of core materials.
  * 
- * This function calls the get_material_names function to obtain a list of core material names.
+ * This function calls the get_core_material_names function to obtain a list of core material names.
  * It then converts this list into a JSON array and returns it.
  * 
  * @return json A JSON array containing the names of core materials. If an exception occurs, a JSON object with the exception message is returned.
@@ -606,7 +606,7 @@ json get_wire_materials() {
  */
 json get_core_material_names() {
     try {
-        auto materialNames = OpenMagnetics::get_material_names(std::nullopt);
+        auto materialNames = OpenMagnetics::get_core_material_names(std::nullopt);
         json result = json::array();
         for (auto elem : materialNames) {
             result.push_back(elem);
@@ -633,7 +633,7 @@ json get_core_material_names() {
  */
 json get_core_material_names_by_manufacturer(std::string manufacturerName) {
     try {
-        auto materialNames = OpenMagnetics::get_material_names(manufacturerName);
+        auto materialNames = OpenMagnetics::get_core_material_names(manufacturerName);
         json result = json::array();
         for (auto elem : materialNames) {
             result.push_back(elem);
@@ -660,7 +660,7 @@ json get_core_material_names_by_manufacturer(std::string manufacturerName) {
 json get_core_shape_names(bool includeToroidal) {
     try {
         settings->set_use_toroidal_cores(includeToroidal);
-        auto shapeNames = OpenMagnetics::get_shape_names();
+        auto shapeNames = OpenMagnetics::get_core_shape_names();
         json result = json::array();
         for (auto elem : shapeNames) {
             result.push_back(elem);
@@ -1646,9 +1646,9 @@ json process_bobbin(json bobbinJson){
     }
 }
 
-json get_wire_data(json coilFunctionalDescriptionDataJson){
-    OpenMagnetics::CoilFunctionalDescription coilFunctionalDescription(coilFunctionalDescriptionDataJson);
-    auto wire = OpenMagnetics::Coil::resolve_wire(coilFunctionalDescription);
+json get_wire_data(json windingDataJson){
+    OpenMagnetics::Winding winding(windingDataJson);
+    auto wire = OpenMagnetics::Coil::resolve_wire(winding);
     json result;
     to_json(result, wire);
     return result;
@@ -2054,26 +2054,26 @@ std::vector<std::string> get_available_core_shape_families(){
  * @return std::vector<std::string> A vector containing the names of the available core materials.
  */
 std::vector<std::string> get_available_core_materials(std::string manufacturer){
-    return OpenMagnetics::get_material_names(manufacturer);
+    return OpenMagnetics::get_core_material_names(manufacturer);
 }
 
 /**
  * @brief Retrieves a list of available core shapes.
  *
- * This function calls the get_shape_names() function to obtain
+ * This function calls the get_core_shape_names() function to obtain
  * a vector of strings representing the names of available core shapes.
  *
  * @return std::vector<std::string> A vector containing the names of available core shapes.
  */
 std::vector<std::string> get_available_core_shapes(){
-    return OpenMagnetics::get_shape_names();
+    return OpenMagnetics::get_core_shape_names();
 }
 
 
 /**
  * @brief Retrieves a list of available cores.
  *
- * This function calls the get_shape_names() function to obtain
+ * This function calls the get_core_shape_names() function to obtain
  * a vector of strings representing the names of available cores.
  *
  * @return std::vector<std::string> A vector containing the names of available cores.
@@ -2917,13 +2917,13 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
 
         std::vector<double> proportionPerWinding = proportionPerWindingJson;
         std::vector<size_t> pattern = patternJson;
-        std::vector<OpenMagnetics::CoilFunctionalDescription> coilFunctionalDescription;
+        std::vector<OpenMagnetics::Winding> winding;
         for (auto elem : coilJson["functionalDescription"]) {
-            coilFunctionalDescription.push_back(OpenMagnetics::CoilFunctionalDescription(elem));
+            winding.push_back(OpenMagnetics::Winding(elem));
         }
         OpenMagnetics::Coil coil;
         coil.set_bobbin(coilJson["bobbin"]);
-        coil.set_functional_description(coilFunctionalDescription);
+        coil.set_functional_description(winding);
         coil.preload_margins(marginPairs);
         if (coilJson.contains("layersOrientation")) {
 
@@ -2996,7 +2996,7 @@ json wind(json coilJson, size_t repetitions, json proportionPerWindingJson, json
             }
         }
 
-        if (proportionPerWinding.size() == coilFunctionalDescription.size()) {
+        if (proportionPerWinding.size() == winding.size()) {
             if (pattern.size() > 0 && repetitions > 0) {
                 coil.wind(proportionPerWinding, pattern, repetitions);
             }
@@ -3083,9 +3083,9 @@ json wind_by_sections(json coilJson, size_t repetitions, json proportionPerWindi
 
         std::vector<double> proportionPerWinding = proportionPerWindingJson;
         std::vector<size_t> pattern = patternJson;
-        std::vector<OpenMagnetics::CoilFunctionalDescription> coilFunctionalDescription;
+        std::vector<OpenMagnetics::Winding> winding;
         for (auto elem : coilJson["functionalDescription"]) {
-            coilFunctionalDescription.push_back(OpenMagnetics::CoilFunctionalDescription(elem));
+            winding.push_back(OpenMagnetics::Winding(elem));
         }
         OpenMagnetics::Coil coil;
 
@@ -3106,13 +3106,13 @@ json wind_by_sections(json coilJson, size_t repetitions, json proportionPerWindi
         }
 
         coil.set_bobbin(coilJson["bobbin"]);
-        coil.set_functional_description(coilFunctionalDescription);
+        coil.set_functional_description(winding);
 
         if (insulationThickness > 0) {
             coil.calculate_custom_thickness_insulation(insulationThickness);
         }
 
-        if (proportionPerWinding.size() == coilFunctionalDescription.size()) {
+        if (proportionPerWinding.size() == winding.size()) {
             if (pattern.size() > 0 && repetitions > 0) {
                 coil.wind_by_sections(proportionPerWinding, pattern, repetitions);
             }
@@ -3172,9 +3172,9 @@ json wind_by_layers(json coilJson, json insulationLayersJson, double insulationT
             insulationLayers[windingsMapKey] = layers;
         }
 
-        std::vector<OpenMagnetics::CoilFunctionalDescription> coilFunctionalDescription;
+        std::vector<OpenMagnetics::Winding> winding;
         for (auto elem : coilJson["functionalDescription"]) {
-            coilFunctionalDescription.push_back(OpenMagnetics::CoilFunctionalDescription(elem));
+            winding.push_back(OpenMagnetics::Winding(elem));
         }
 
         std::vector<Section> coilSectionsDescription;
@@ -3208,7 +3208,7 @@ json wind_by_layers(json coilJson, json insulationLayersJson, double insulationT
         }
 
         coil.set_bobbin(coilJson["bobbin"]);
-        coil.set_functional_description(coilFunctionalDescription);
+        coil.set_functional_description(winding);
         coil.set_sections_description(coilSectionsDescription);
         coil.wind_by_layers();
 
@@ -3237,9 +3237,9 @@ json wind_by_layers(json coilJson, json insulationLayersJson, double insulationT
 json wind_by_turns(json coilJson) {
     try {
 
-        std::vector<OpenMagnetics::CoilFunctionalDescription> coilFunctionalDescription;
+        std::vector<OpenMagnetics::Winding> winding;
         for (auto elem : coilJson["functionalDescription"]) {
-            coilFunctionalDescription.push_back(OpenMagnetics::CoilFunctionalDescription(elem));
+            winding.push_back(OpenMagnetics::Winding(elem));
         }
         std::vector<Section> coilSectionsDescription;
         for (auto elem : coilJson["sectionsDescription"]) {
@@ -3269,7 +3269,7 @@ json wind_by_turns(json coilJson) {
         }
 
         coil.set_bobbin(coilJson["bobbin"]);
-        coil.set_functional_description(coilFunctionalDescription);
+        coil.set_functional_description(winding);
         coil.set_sections_description(coilSectionsDescription);
         coil.set_layers_description(coilLayersDescription);
         coil.wind_by_turns();
@@ -3308,9 +3308,9 @@ json wind_by_turns(json coilJson) {
 json delimit_and_compact(json coilJson) {
     try {
 
-        std::vector<OpenMagnetics::CoilFunctionalDescription> coilFunctionalDescription;
+        std::vector<OpenMagnetics::Winding> winding;
         for (auto elem : coilJson["functionalDescription"]) {
-            coilFunctionalDescription.push_back(OpenMagnetics::CoilFunctionalDescription(elem));
+            winding.push_back(OpenMagnetics::Winding(elem));
         }
         std::vector<Section> coilSectionsDescription;
         for (auto elem : coilJson["sectionsDescription"]) {
@@ -3344,7 +3344,7 @@ json delimit_and_compact(json coilJson) {
         }
 
         coil.set_bobbin(coilJson["bobbin"]);
-        coil.set_functional_description(coilFunctionalDescription);
+        coil.set_functional_description(winding);
         coil.set_sections_description(coilSectionsDescription);
         coil.set_layers_description(coilLayersDescription);
         coil.set_turns_description(coilTurnsDescription);

@@ -136,6 +136,7 @@ message(STATUS ${MAS_SOURCE_DIR})
 
 message(STATUS "Compiling MAS")
 
+
 add_custom_command(
   OUTPUT "${MAS_DIRECTORY}/MAS.hpp"
   COMMAND quicktype -l c++ -s schema ${MAS_DIR}/schemas/MAS.json 
