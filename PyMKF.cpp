@@ -3893,6 +3893,130 @@ json calculate_steinmetz_coefficients_with_error(json dataJson, json rangesJson)
     }
 }
 
+std::string clear_magnetic_cache() {
+    try {
+        magneticsCache.clear();
+        return std::to_string(magneticsCache.size());
+    }
+    catch (const std::exception &exc) {
+        return std::string{exc.what()};
+    }
+}
+
+
+std::string load_magnetics_from_file(std::string path, bool expand) {
+    try {
+        std::ifstream in(path);
+        if (in) {
+            std::string line;
+            while (getline(in, line)) {
+                json jf = json::parse(line);
+                OpenMagnetics::Magnetic magnetic(jf);
+                if (expand) {
+                    magnetic = OpenMagnetics::magnetic_autocomplete(magnetic);
+                }
+                std::string key = magnetic.get_manufacturer_info()->get_reference().value();
+                magneticsCache.load(key, magnetic);
+            }
+        }
+        return std::to_string(magneticsCache.size());
+    }
+    catch (const std::exception &exc) {
+        return std::string{exc.what()};
+    }
+}
+
+json calculate_advised_magnetics_from_catalog(json inputsJson, json catalogJson, int maximumNumberResults){
+    try {
+        settings->set_coil_delimit_and_compact(true);
+        OpenMagnetics::Inputs inputs(inputsJson);
+        std::map<OpenMagnetics::MagneticFilters, double> weights;
+
+        std::vector <OpenMagnetics::Magnetic> catalog;
+
+        for (auto magneticJson : catalogJson) {
+            OpenMagnetics::Magnetic magnetic(magneticJson);
+            catalog.push_back(magnetic);
+        }
+
+        OpenMagnetics::MagneticAdviser magneticAdviser;
+        auto masMagnetics = magneticAdviser.get_advised_magnetic(inputs, catalog, maximumNumberResults);
+
+        auto scorings = magneticAdviser.get_scorings();
+
+        json results = json();
+        results["data"] = json::array();
+        for (auto& [masMagnetic, scoring] : masMagnetics) {
+            std::string name = masMagnetic.get_magnetic().get_manufacturer_info().value().get_reference().value();
+            json result;
+            json masJson;
+            to_json(masJson, masMagnetic);
+            result["mas"] = masJson;
+            result["scoring"] = scoring;
+            results["data"].push_back(result);
+        }
+
+        sort(results["data"].begin(), results["data"].end(), [](json& b1, json& b2) {
+            return b1["scoring"] > b2["scoring"];
+        });
+
+        return results;
+    }
+    catch (const std::exception &exc) {
+        std::cout << inputsJson << std::endl;
+        std::cout << catalogJson << std::endl;
+        std::cout << maximumNumberResults << std::endl;
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
+json calculate_advised_magnetics_from_cache(json inputsJson, json filterFlowJson, int maximumNumberResults){
+    try {
+        settings->set_coil_delimit_and_compact(true);
+        OpenMagnetics::Inputs inputs(inputsJson);
+
+        std::vector<OpenMagnetics::MagneticFilterOperation> filterFlow;
+        for (auto filterJson : filterFlowJson) {
+            OpenMagnetics::MagneticFilterOperation filter(filterJson);
+            filterFlow.push_back(filter);
+        }
+
+        if (magneticsCache.size() == 0) {
+            return "Exception: No magnetics found in cache";
+        }
+
+        OpenMagnetics::MagneticAdviser magneticAdviser;
+        auto masMagnetics = magneticAdviser.get_advised_magnetic(inputs, magneticsCache.get(), filterFlow, maximumNumberResults);
+
+        auto scorings = magneticAdviser.get_scorings();
+
+        json results = json();
+        results["data"] = json::array();
+        for (auto& [masMagnetic, scoring] : masMagnetics) {
+            std::string name = masMagnetic.get_magnetic().get_manufacturer_info().value().get_reference().value();
+            json result;
+            json masJson;
+            to_json(masJson, masMagnetic);
+            result["mas"] = masJson;
+            result["scoring"] = scoring;
+            results["data"].push_back(result);
+        }
+
+        sort(results["data"].begin(), results["data"].end(), [](json& b1, json& b2) {
+            return b1["scoring"] > b2["scoring"];
+        });
+
+        return results;
+    }
+    catch (const std::exception &exc) {
+        std::cout << inputsJson << std::endl;
+        std::cout << filterFlowJson << std::endl;
+        std::cout << maximumNumberResults << std::endl;
+        return "Exception: " + std::string{exc.what()};
+    }
+}
+
+
 
 PYBIND11_MODULE(PyMKF, m) {
     m.def("get_constants", &get_constants, "");
@@ -4058,4 +4182,11 @@ PYBIND11_MODULE(PyMKF, m) {
     m.def("magnetic_autocomplete", &magnetic_autocomplete, "");
     m.def("calculate_steinmetz_coefficients", &calculate_steinmetz_coefficients, "");
     m.def("calculate_steinmetz_coefficients_with_error", &calculate_steinmetz_coefficients_with_error, "");
+
+    m.def("clear_magnetic_cache", &clear_magnetic_cache, "");
+    // m.def("load_magnetic", &load_magnetic, "");
+    // m.def("load_magnetics", &load_magnetics, "");
+    m.def("load_magnetics_from_file", &load_magnetics_from_file, "");
+    m.def("calculate_advised_magnetics_from_catalog", &calculate_advised_magnetics_from_catalog, "");
+    m.def("calculate_advised_magnetics_from_cache", &calculate_advised_magnetics_from_cache, "");
 }
