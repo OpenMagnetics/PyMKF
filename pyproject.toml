@@ -5,7 +5,7 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "PyMKF"
 version = "0.9.43"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [
   { name="Alfonso Martinez", email="Alfonso_VII@hotmail.com" },
 ]
@@ -32,7 +32,6 @@ cmake.verbose = true
 [[tool.scikit-build.overrides]]
 if.platform-system = "^linux"
 build.tool-args = ["-j8"]
-build-dir = "/tmp/pymkf/build/ea"
 [[tool.scikit-build.overrides]]
 if.platform-system = "^win32"
 build.tool-args = ["-maxcpucount:8"]
