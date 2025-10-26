@@ -3973,25 +3973,32 @@ json calculate_advised_magnetics_from_catalog(json inputsJson, json catalogJson,
 json calculate_advised_magnetics_from_cache(json inputsJson, json filterFlowJson, int maximumNumberResults){
     try {
         settings->set_coil_delimit_and_compact(true);
+        std::cout << "Mierda 1" << std::endl;
         OpenMagnetics::Inputs inputs(inputsJson);
 
         std::vector<OpenMagnetics::MagneticFilterOperation> filterFlow;
+        std::cout << "Mierda 2" << std::endl;
         for (auto filterJson : filterFlowJson) {
             OpenMagnetics::MagneticFilterOperation filter(filterJson);
             filterFlow.push_back(filter);
         }
 
+        std::cout << "Mierda 3" << std::endl;
         if (magneticsCache.size() == 0) {
             return "Exception: No magnetics found in cache";
         }
 
         OpenMagnetics::MagneticAdviser magneticAdviser;
+        std::cout << "Mierda 4" << std::endl;
         auto masMagnetics = magneticAdviser.get_advised_magnetic(inputs, magneticsCache.get(), filterFlow, maximumNumberResults);
+        std::cout << "Mierda 5" << std::endl;
 
         auto scorings = magneticAdviser.get_scorings();
+        std::cout << "Mierda 6" << std::endl;
 
         json results = json();
         results["data"] = json::array();
+        std::cout << "Mierda 7" << std::endl;
         for (auto& [masMagnetic, scoring] : masMagnetics) {
             std::string name = masMagnetic.get_magnetic().get_manufacturer_info().value().get_reference().value();
             json result;
@@ -4002,16 +4009,18 @@ json calculate_advised_magnetics_from_cache(json inputsJson, json filterFlowJson
             results["data"].push_back(result);
         }
 
+        std::cout << "Mierda 8" << std::endl;
         sort(results["data"].begin(), results["data"].end(), [](json& b1, json& b2) {
             return b1["scoring"] > b2["scoring"];
         });
+        std::cout << "Mierda 9" << std::endl;
 
         return results;
     }
     catch (const std::exception &exc) {
-        std::cout << inputsJson << std::endl;
-        std::cout << filterFlowJson << std::endl;
-        std::cout << maximumNumberResults << std::endl;
+        // std::cout << inputsJson << std::endl;
+        // std::cout << filterFlowJson << std::endl;
+        // std::cout << maximumNumberResults << std::endl;
         return "Exception: " + std::string{exc.what()};
     }
 }

@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "PyMKF"
-version = "0.9.42"
+version = "0.9.43"
 requires-python = ">=3.8"
 authors = [
   { name="Alfonso Martinez", email="Alfonso_VII@hotmail.com" },
@@ -45,6 +45,7 @@ manylinux-ppc64le-image = "manylinux_2_28"
 manylinux-s390x-image = "manylinux_2_28"
 manylinux-pypy_x86_64-image = "manylinux_2_28"
 manylinux-pypy_aarch64-image = "manylinux_2_28"
+environment = { GIT_LFS_SKIP_SMUDGE=1 }
 build-verbosity = 1
 
 [tool.cibuildwheel.linux]
