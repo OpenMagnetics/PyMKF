@@ -1,4 +1,5 @@
 sqlalchemy
 pymkf
 pandas
+pipx
 psycopg2-binary
