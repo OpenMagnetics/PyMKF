@@ -101,6 +101,11 @@ if(NOT matplotplusplus_POPULATED)
     add_subdirectory(${matplotplusplus_SOURCE_DIR} ${matplotplusplus_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+FetchContent_Declare(rapidfuzz
+  GIT_REPOSITORY https://github.com/rapidfuzz/rapidfuzz-cpp.git
+  GIT_TAG main)
+FetchContent_MakeAvailable(rapidfuzz)
+
 message(STATUS "Fetching MKF")
 FetchContent_Declare(MKF
         GIT_REPOSITORY https://github.com/OpenMagnetics/MKF.git
@@ -204,7 +209,7 @@ add_dependencies(PyMKF PyMASGeneration)
 
 FetchContent_MakeAvailable(magic-enum)
 
-target_link_libraries(PyMKF PUBLIC nlohmann_json::nlohmann_json matplot levmar)
+target_link_libraries(PyMKF PUBLIC nlohmann_json::nlohmann_json matplot levmar rapidfuzz::rapidfuzz)
 
 file(DOWNLOAD "https://raw.githubusercontent.com/vector-of-bool/cmrc/master/CMakeRC.cmake"
                  "${CMAKE_BINARY_DIR}/CMakeRC.cmake")
