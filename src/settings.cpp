@@ -186,12 +186,75 @@ json get_default_models() {
 }
 
 void register_settings_bindings(py::module& m) {
-    m.def("get_constants", &get_constants);
-    m.def("get_defaults", &get_defaults);
-    m.def("get_settings", &get_settings);
-    m.def("set_settings", &set_settings);
-    m.def("reset_settings", &reset_settings);
-    m.def("get_default_models", &get_default_models);
+    m.def("get_constants", &get_constants,
+        R"pbdoc(
+        Get physical and system constants used in calculations.
+        
+        Returns a dictionary of constants including vacuum permeability,
+        vacuum permittivity, gap parameters, and display settings.
+        
+        Returns:
+            Dictionary with constant names as keys and values.
+        )pbdoc");
+    
+    m.def("get_defaults", &get_defaults,
+        R"pbdoc(
+        Get default values for various parameters and models.
+        
+        Returns defaults for core losses models, temperature models,
+        reluctance models, and design thresholds.
+        
+        Returns:
+            Dictionary with default parameter names and values.
+        )pbdoc");
+    
+    m.def("get_settings", &get_settings,
+        R"pbdoc(
+        Get current library settings.
+        
+        Returns all configurable settings including coil winding options,
+        painter/visualization settings, and magnetic field calculation options.
+        
+        Returns:
+            JSON object with all current settings.
+        )pbdoc");
+    
+    m.def("set_settings", &set_settings,
+        R"pbdoc(
+        Update library settings.
+        
+        Configures coil winding options, visualization settings, and
+        calculation parameters.
+        
+        Args:
+            settings_json: JSON object with settings to update.
+                          Only included keys will be modified.
+        
+        Common settings:
+            - coilAllowMarginTape: Allow margin tape in windings
+            - coilAllowInsulatedWire: Allow insulated wire
+            - useOnlyCoresInStock: Limit to in-stock cores
+            - painterNumberPointsX/Y: Field plot resolution
+        )pbdoc");
+    
+    m.def("reset_settings", &reset_settings,
+        R"pbdoc(
+        Reset all settings to default values.
+        
+        Restores all library settings to their initial defaults.
+        Useful for ensuring consistent behavior between tests.
+        )pbdoc");
+    
+    m.def("get_default_models", &get_default_models,
+        R"pbdoc(
+        Get names of default calculation models.
+        
+        Returns the default model selections for core losses,
+        temperature, reluctance, and magnetic field calculations.
+        
+        Returns:
+            JSON object mapping model types to default model names.
+        )pbdoc");
 }
 
 } // namespace PyMKF

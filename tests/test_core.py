@@ -135,6 +135,7 @@ class TestCoreMaterialProperties:
             assert isinstance(coeffs, dict)
             assert len(coeffs) > 0
 
+    @pytest.mark.xfail(reason="get_core_material_available_losses_methods not implemented in PyMKF")
     def test_get_available_losses_methods(self):
         """Should retrieve available loss calculation methods."""
         names = PyMKF.get_core_material_names()

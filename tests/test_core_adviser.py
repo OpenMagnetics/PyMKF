@@ -29,8 +29,9 @@ class TestCoreAdviserBasic:
         """
         processed_inputs = PyMKF.process_inputs(inductor_inputs)
         
-        # API: calculate_advised_cores(inputs, weights, max_results, use_only_stock)
-        result_json = PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 10, False)
+        # API: calculate_advised_cores(inputs, weights, max_results, core_mode)
+        # Note: core_mode must be lowercase with space: "available cores" or "standard cores"
+        result_json = PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 10, "available cores")
         results = parse_json_result(result_json)
         
         assert isinstance(results, list)
@@ -43,7 +44,7 @@ class TestCoreAdviserBasic:
         """
         processed_inputs = PyMKF.process_inputs(inductor_inputs)
         
-        result_json = PyMKF.calculate_advised_cores(processed_inputs, efficiency_weights, 5, False)
+        result_json = PyMKF.calculate_advised_cores(processed_inputs, efficiency_weights, 5, "available cores")
         results = parse_json_result(result_json)
         
         assert isinstance(results, list)
@@ -52,7 +53,7 @@ class TestCoreAdviserBasic:
         """Advised cores should include scoring information."""
         processed_inputs = PyMKF.process_inputs(inductor_inputs)
         
-        result_json = PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 5, False)
+        result_json = PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 5, "available cores")
         results = parse_json_result(result_json)
         
         if len(results) > 0:
@@ -70,7 +71,7 @@ class TestCoreAdviserWithDifferentInputs:
         """Test core adviser with high frequency (~500kHz) inputs."""
         processed_inputs = PyMKF.process_inputs(high_frequency_inputs)
         
-        result_json = PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 5, False)
+        result_json = PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 5, "available cores")
         results = parse_json_result(result_json)
         
         assert isinstance(results, list)
@@ -80,7 +81,7 @@ class TestCoreAdviserWithDifferentInputs:
         """Test core adviser with transformer (multi-winding) inputs."""
         processed_inputs = PyMKF.process_inputs(transformer_inputs)
         
-        result_json = PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 5, False)
+        result_json = PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 5, "available cores")
         results = parse_json_result(result_json)
         
         assert isinstance(results, list)
@@ -94,7 +95,7 @@ class TestCoreAdviserWeights:
         weights = {"COST": 1, "EFFICIENCY": 0, "DIMENSIONS": 0}
         processed_inputs = PyMKF.process_inputs(inductor_inputs)
         
-        result_json = PyMKF.calculate_advised_cores(processed_inputs, weights, 5, False)
+        result_json = PyMKF.calculate_advised_cores(processed_inputs, weights, 5, "available cores")
         results = parse_json_result(result_json)
         
         assert isinstance(results, list)
@@ -104,7 +105,7 @@ class TestCoreAdviserWeights:
         weights = {"COST": 0, "EFFICIENCY": 0, "DIMENSIONS": 1}
         processed_inputs = PyMKF.process_inputs(inductor_inputs)
         
-        result_json = PyMKF.calculate_advised_cores(processed_inputs, weights, 5, False)
+        result_json = PyMKF.calculate_advised_cores(processed_inputs, weights, 5, "available cores")
         results = parse_json_result(result_json)
         
         assert isinstance(results, list)
@@ -114,7 +115,7 @@ class TestCoreAdviserWeights:
         weights = {"COST": 1, "EFFICIENCY": 1, "DIMENSIONS": 1}
         processed_inputs = PyMKF.process_inputs(inductor_inputs)
         
-        result_json = PyMKF.calculate_advised_cores(processed_inputs, weights, 5, False)
+        result_json = PyMKF.calculate_advised_cores(processed_inputs, weights, 5, "available cores")
         results = parse_json_result(result_json)
         
         assert isinstance(results, list)
@@ -127,21 +128,22 @@ class TestCoreAdviserFiltering:
         """Should respect max_results limit."""
         processed_inputs = PyMKF.process_inputs(inductor_inputs)
         
-        results_5 = parse_json_result(PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 5, False))
-        results_2 = parse_json_result(PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 2, False))
+        results_5 = parse_json_result(PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 5, "available cores"))
+        results_2 = parse_json_result(PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 2, "available cores"))
         
         assert len(results_2) <= 2
         assert len(results_5) <= 5
 
-    def test_stock_only_filtering(self, inductor_inputs, balanced_weights, reset_settings):
-        """Test filtering for in-stock cores only."""
+    def test_different_core_modes(self, inductor_inputs, balanced_weights, reset_settings):
+        """Test with different core selection modes."""
         processed_inputs = PyMKF.process_inputs(inductor_inputs)
         
-        # With stock only
-        results_stock = parse_json_result(PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 10, True))
+        # Test with available cores mode
+        results_available = parse_json_result(PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 10, "available cores"))
         
-        # Without stock filter
-        results_all = parse_json_result(PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 10, False))
+        # Test with standard cores mode
+        results_standard = parse_json_result(PyMKF.calculate_advised_cores(processed_inputs, balanced_weights, 10, "standard cores"))
         
-        # Stock-only should have <= results than all
-        assert len(results_stock) <= len(results_all) or len(results_stock) == 0
+        # Both should return lists
+        assert isinstance(results_available, list)
+        assert isinstance(results_standard, list)

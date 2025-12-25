@@ -189,16 +189,136 @@ std::vector<double> python_list_to_vector(py::list pythonList) {
 }
 
 void register_utils_bindings(py::module& m) {
-    m.def("resolve_dimension_with_tolerance", &resolve_dimension_with_tolerance);
-    m.def("calculate_basic_processed_data", &calculate_basic_processed_data);
-    m.def("calculate_harmonics", &calculate_harmonics);
-    m.def("calculate_sampled_waveform", &calculate_sampled_waveform);
+    m.def("resolve_dimension_with_tolerance", &resolve_dimension_with_tolerance,
+        R"pbdoc(
+        Resolve a dimension specification that may include tolerances.
+        
+        Extracts a single value from dimension data that may contain
+        nominal, minimum, and maximum values.
+        
+        Args:
+            dimension_json: JSON object with dimension specification.
+        
+        Returns:
+            Resolved dimension value as float.
+        )pbdoc");
+    
+    m.def("calculate_basic_processed_data", &calculate_basic_processed_data,
+        R"pbdoc(
+        Calculate basic processed data from a waveform.
+        
+        Extracts peak-to-peak, RMS, offset, and other basic metrics.
+        
+        Args:
+            waveform_json: JSON object with waveform data and time points.
+        
+        Returns:
+            JSON object with processed waveform characteristics.
+        )pbdoc");
+    
+    m.def("calculate_harmonics", &calculate_harmonics,
+        R"pbdoc(
+        Calculate harmonic content of a waveform.
+        
+        Performs FFT analysis to extract harmonic amplitudes and phases.
+        
+        Args:
+            waveform_json: JSON object with waveform data.
+            frequency: Fundamental frequency in Hz.
+        
+        Returns:
+            JSON object with harmonic amplitudes and frequencies.
+        )pbdoc");
+    
+    m.def("calculate_sampled_waveform", &calculate_sampled_waveform,
+        R"pbdoc(
+        Resample a waveform at regular intervals.
+        
+        Interpolates waveform data to create uniformly sampled points.
+        
+        Args:
+            waveform_json: JSON object with waveform data.
+            frequency: Frequency for determining sample period.
+        
+        Returns:
+            JSON object with uniformly sampled waveform.
+        )pbdoc");
+    
     m.def("calculate_processed_data", &calculate_processed_data,
-          py::arg("signalDescriptorJson"), py::arg("sampledWaveformJson"), py::arg("includeDcComponent"));
-    m.def("calculate_instantaneous_power", &calculate_instantaneous_power);
-    m.def("calculate_rms_power", &calculate_rms_power);
-    m.def("calculate_reflected_secondary", &calculate_reflected_secondary);
-    m.def("calculate_reflected_primary", &calculate_reflected_primary);
+        R"pbdoc(
+        Calculate complete processed data from a signal descriptor.
+        
+        Computes RMS, peak, offset, effective frequency, and other metrics.
+        
+        Args:
+            signal_descriptor_json: JSON object with signal data.
+            sampled_waveform_json: JSON object with sampled waveform.
+            include_dc_component: Whether to include DC in calculations.
+        
+        Returns:
+            JSON object with complete processed data.
+        )pbdoc",
+        py::arg("signalDescriptorJson"), py::arg("sampledWaveformJson"), py::arg("includeDcComponent"));
+    
+    m.def("calculate_instantaneous_power", &calculate_instantaneous_power,
+        R"pbdoc(
+        Calculate instantaneous power waveform.
+        
+        Multiplies voltage and current waveforms point-by-point.
+        
+        Args:
+            voltage_json: JSON object with voltage waveform.
+            current_json: JSON object with current waveform.
+            frequency: Operating frequency in Hz.
+        
+        Returns:
+            JSON array of instantaneous power values.
+        )pbdoc");
+    
+    m.def("calculate_rms_power", &calculate_rms_power,
+        R"pbdoc(
+        Calculate RMS (apparent) power.
+        
+        Computes product of RMS voltage and RMS current.
+        
+        Args:
+            voltage_json: JSON object with voltage signal descriptor.
+            current_json: JSON object with current signal descriptor.
+            frequency: Operating frequency in Hz.
+        
+        Returns:
+            RMS power value in watts.
+        )pbdoc");
+    
+    m.def("calculate_reflected_secondary", &calculate_reflected_secondary,
+        R"pbdoc(
+        Calculate reflected secondary winding excitation.
+        
+        Transforms primary winding excitation to secondary side
+        using the turns ratio.
+        
+        Args:
+            primary_excitation_json: JSON object with primary excitation.
+            turn_ratio: Primary to secondary turns ratio.
+        
+        Returns:
+            JSON object with secondary excitation.
+        )pbdoc");
+    
+    m.def("calculate_reflected_primary", &calculate_reflected_primary,
+        R"pbdoc(
+        Calculate reflected primary winding excitation.
+        
+        Transforms secondary winding excitation to primary side
+        using the turns ratio.
+        
+        Args:
+            secondary_excitation_json: JSON object with secondary excitation.
+            turn_ratio: Primary to secondary turns ratio.
+        
+        Returns:
+            JSON object with primary excitation.
+        )pbdoc");
 }
 
 } // namespace PyMKF
