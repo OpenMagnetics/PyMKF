@@ -368,9 +368,7 @@ double get_material_permeability(json materialName, double temperature, double m
         return initialPermeability.get_initial_permeability(materialData, temperature, magneticFieldDcBias, frequency);
     }
     catch (const std::exception &exc) {
-        json exception;
-        exception["data"] = "Exception: " + std::string{exc.what()};
-        return exception;
+        throw std::runtime_error("Exception: " + std::string{exc.what()});
     }
 }
 
@@ -392,9 +390,7 @@ double get_material_resistivity(json materialName, double temperature) {
         return (*resistivityModel).get_resistivity(materialData, temperature);
     }
     catch (const std::exception &exc) {
-        json exception;
-        exception["data"] = "Exception: " + std::string{exc.what()};
-        return exception;
+        throw std::runtime_error("Exception: " + std::string{exc.what()});
     }
 }
 
@@ -4012,174 +4008,226 @@ json calculate_advised_magnetics_from_cache(json inputsJson, json filterFlowJson
 
 
 PYBIND11_MODULE(PyMKF, m) {
-    m.def("get_constants", &get_constants, "");
-    m.def("get_defaults", &get_defaults, "");
-    m.def("get_core_materials", &get_core_materials, "");
-    m.def("get_material_permeability", &get_material_permeability, "");
-    m.def("get_material_resistivity", &get_material_resistivity, "");
-    m.def("get_core_material_steinmetz_coefficients", &get_core_material_steinmetz_coefficients, "");
-    m.def("get_core_shapes", &get_core_shapes, "");
-    m.def("get_core_shape_families", &get_core_shape_families, "");
-    m.def("get_wires", &get_wires, "");
-    m.def("get_bobbins", &get_bobbins, "");
-    m.def("get_insulation_materials", &get_insulation_materials, "");
-    m.def("get_wire_materials", &get_wire_materials, "");
-    m.def("get_core_material_names", &get_core_material_names, "");
-    m.def("get_core_material_names_by_manufacturer", &get_core_material_names_by_manufacturer, "");
-    m.def("get_core_shape_names", &get_core_shape_names, "");
-    m.def("get_wire_names", &get_wire_names, "");
-    m.def("get_bobbin_names", &get_bobbin_names, "");
-    m.def("get_insulation_material_names", &get_insulation_material_names, "");
-    m.def("get_wire_material_names", &get_wire_material_names, "");
-    m.def("find_core_material_by_name", &find_core_material_by_name, "");
-    m.def("find_core_shape_by_name", &find_core_shape_by_name, "");
-    m.def("find_wire_by_name", &find_wire_by_name, "");
-    m.def("find_bobbin_by_name", &find_bobbin_by_name, "");
-    m.def("find_insulation_material_by_name", &find_insulation_material_by_name, "");
-    m.def("find_wire_material_by_name", &find_wire_material_by_name, "");
-    m.def("find_wire_by_dimension", &find_wire_by_dimension, "");
-    m.def("create_basic_bobbin", &create_basic_bobbin, "");
-    m.def("create_basic_bobbin_by_thickness", &create_basic_bobbin_by_thickness, "");
-    m.def("calculate_core_data", &calculate_core_data, "");
-    m.def("calculate_core_processed_description", &calculate_core_processed_description, "");
-    m.def("calculate_core_geometrical_description", &calculate_core_geometrical_description, "");
-    m.def("calculate_core_gapping", &calculate_core_gapping, "");
-    m.def("wind", &wind, "");
-    m.def("get_default_models", &get_default_models, "");
-    m.def("calculate_inductance_from_number_turns_and_gapping", &calculate_inductance_from_number_turns_and_gapping, "");
-    m.def("calculate_core_losses", &calculate_core_losses, "");
-    m.def("calculate_advised_cores", &calculate_advised_cores, "");
-    m.def("calculate_advised_magnetics", &calculate_advised_magnetics, "");
-    m.def("calculate_winding_losses", &calculate_winding_losses, "");
-    m.def("calculate_ohmic_losses", &calculate_ohmic_losses, "");
-    m.def("calculate_magnetic_field_strength_field", &calculate_magnetic_field_strength_field, "");
-    m.def("calculate_proximity_effect_losses", &calculate_proximity_effect_losses, "");
-    m.def("calculate_skin_effect_losses", &calculate_skin_effect_losses, "");
-    m.def("calculate_skin_effect_losses_per_meter", &calculate_skin_effect_losses_per_meter, "");
-    m.def("plot_core", &plot_core, "");
-    m.def("plot_sections", &plot_sections, "");
-    m.def("plot_layers", &plot_layers, "");
-    m.def("plot_turns", &plot_turns, "");
-    m.def("plot_field", &plot_field, "");
-    m.def("plot_wire", &plot_wire, "");
-    m.def("plot_current_density", &plot_current_density, "");
-    m.def("set_settings", &set_settings, "");
-    m.def("get_settings", &get_settings, "");
-    m.def("reset_settings", &reset_settings, "");
-    m.def("calculate_harmonics", &calculate_harmonics, "");
-    m.def("calculate_signal_from_harmonics", &calculate_signal_from_harmonics, "");
-    m.def("calculate_processed", &calculate_processed, "");
-    m.def("calculate_bobbin_data", &calculate_bobbin_data, "");
-    m.def("process_bobbin", &process_bobbin, "");
-    m.def("get_wire_data", &get_wire_data, "");
-    m.def("get_wire_data_by_name", &get_wire_data_by_name, "");
-    m.def("get_wire_data_by_standard_name", &get_wire_data_by_standard_name, "");
-    m.def("get_strand_by_standard_name", &get_strand_by_standard_name, "");
-    m.def("get_wire_outer_width_rectangular", &get_wire_outer_width_rectangular, "");
-    m.def("get_wire_outer_height_rectangular", &get_wire_outer_height_rectangular, "");
-    m.def("get_wire_outer_diameter_bare_litz", &get_wire_outer_diameter_bare_litz, "");
-    m.def("get_wire_outer_diameter_served_litz", &get_wire_outer_diameter_served_litz, "");
-    m.def("get_wire_outer_diameter_insulated_litz", &get_wire_outer_diameter_insulated_litz, "");
-    m.def("get_wire_outer_diameter_enamelled_round", &get_wire_outer_diameter_enamelled_round, "");
-    m.def("get_wire_outer_diameter_insulated_round", &get_wire_outer_diameter_insulated_round, "");
-    m.def("get_wire_conducting_diameter_by_standard_name", &get_wire_conducting_diameter_by_standard_name, "");
-    m.def("get_outer_dimensions", &get_outer_dimensions, "");
-    m.def("get_equivalent_wire", &get_equivalent_wire, "");
-    m.def("get_coating_label", &get_coating_label, "");
-    m.def("get_wire_coating_by_label", &get_wire_coating_by_label, "");
-    m.def("get_coating_labels_by_type", &get_coating_labels_by_type, "");
-    m.def("load_core_data", &load_core_data, "");
-    m.def("get_material_data", &get_material_data, "");
-    m.def("get_core_temperature_dependant_parameters", &get_core_temperature_dependant_parameters, "");
-    m.def("calculate_shape_data", &calculate_shape_data, "");
-    m.def("get_shape_data", &get_shape_data, "");
-    m.def("get_available_shape_families", &get_available_shape_families, "");
-    m.def("get_available_core_materials", &get_available_core_materials, "");
-    m.def("get_available_core_manufacturers", &get_available_core_manufacturers, "");
-    m.def("get_available_core_shape_families", &get_available_core_shape_families, "");
-    m.def("get_available_core_shapes", &get_available_core_shapes, "");
-    m.def("get_available_cores", &get_available_cores, "");
-    m.def("get_available_wires", &get_available_wires, "");
-    m.def("get_unique_wire_diameters", &get_unique_wire_diameters, "");
-    m.def("get_available_wire_types", &get_available_wire_types, "");
-    m.def("get_available_wire_standards", &get_available_wire_standards, "");
-    m.def("calculate_gap_reluctance", &calculate_gap_reluctance, "");
-    m.def("get_gap_reluctance_model_information", &get_gap_reluctance_model_information, "");
-    m.def("calculate_number_turns_from_gapping_and_inductance", &calculate_number_turns_from_gapping_and_inductance, "");
-    m.def("calculate_gapping_from_number_turns_and_inductance", &calculate_gapping_from_number_turns_and_inductance, "");
-    m.def("get_core_losses_model_information", &get_core_losses_model_information, "");
-    m.def("get_core_temperature_model_information", &get_core_temperature_model_information, "");
-    m.def("resolve_dimension_with_tolerance", &resolve_dimension_with_tolerance, "");
-    m.def("calculate_induced_voltage", &calculate_induced_voltage, "");
-    m.def("calculate_induced_current", &calculate_induced_current, "");
-    m.def("calculate_reflected_secondary", &calculate_reflected_secondary, "");
-    m.def("calculate_reflected_primary", &calculate_reflected_primary, "");
-    m.def("calculate_instantaneous_power", &calculate_instantaneous_power, "");
-    m.def("calculate_rms_power", &calculate_rms_power, "");
-    m.def("calculate_basic_processed_data", &calculate_basic_processed_data, "");
-    m.def("create_waveform", &create_waveform, "");
-    m.def("scale_waveform_time_to_frequency", &scale_waveform_time_to_frequency, "");
-    m.def("calculate_insulation", &calculate_insulation, "");
-    m.def("extract_operating_point", &extract_operating_point, "");
-    m.def("extract_map_column_names", &extract_map_column_names, "");
-    m.def("extract_column_names", &extract_column_names, "");
-    m.def("calculate_number_turns", &calculate_number_turns, "");
-    m.def("calculate_dc_resistance_per_meter", &calculate_dc_resistance_per_meter, "");
-    m.def("calculate_dc_losses_per_meter", &calculate_dc_losses_per_meter, "");
-    m.def("calculate_skin_ac_losses_per_meter", &calculate_skin_ac_losses_per_meter, "");
-    m.def("calculate_skin_ac_factor", &calculate_skin_ac_factor, "");
-    m.def("calculate_skin_ac_resistance_per_meter", &calculate_skin_ac_resistance_per_meter, "");
-    m.def("calculate_effective_current_density", &calculate_effective_current_density, "");
-    m.def("calculate_effective_skin_depth", &calculate_effective_skin_depth, "");
-    m.def("get_available_winding_orientations", &get_available_winding_orientations, "");
-    m.def("get_available_coil_alignments", &get_available_coil_alignments, "");
-    m.def("check_requirement", &check_requirement, "");
-    m.def("wind_planar", &wind_planar, "");
-    m.def("wind_by_sections", &wind_by_sections, "");
-    m.def("wind_by_layers", &wind_by_layers, "");
-    m.def("wind_by_turns", &wind_by_turns, "");
-    m.def("delimit_and_compact", &delimit_and_compact, "");
-    m.def("get_layers_by_winding_index", &get_layers_by_winding_index, "");
-    m.def("get_layers_by_section", &get_layers_by_section, "");
-    m.def("get_sections_description_conduction", &get_sections_description_conduction, "");
-    m.def("simulate", &simulate, "");
-    m.def("are_sections_and_layers_fitting", &are_sections_and_layers_fitting, "");
-    m.def("add_margin_to_section_by_index", &add_margin_to_section_by_index, "");
-    m.def("check_if_fits", &check_if_fits, "");
-    m.def("get_coating_thickness", &get_coating_thickness, "");
-    m.def("get_coating_relative_permittivity", &get_coating_relative_permittivity, "");
-    m.def("get_coating_insulation_material", &get_coating_insulation_material, "");
-    m.def("get_insulation_layer_insulation_material", &get_insulation_layer_insulation_material, "");
-    m.def("export_magnetic_as_subcircuit", &export_magnetic_as_subcircuit, "");
-    m.def("process_inputs", &process_inputs, "");
-    m.def("load_core_materials", &load_core_materials, "");
-    m.def("load_core_shapes", &load_core_shapes, "");
-    m.def("load_wires", &load_wires, "");
-    m.def("clear_databases", &clear_databases, "");
-    m.def("is_core_material_database_empty", &is_core_material_database_empty, "");
-    m.def("is_core_shape_database_empty", &is_core_shape_database_empty, "");
-    m.def("is_wire_database_empty", &is_wire_database_empty, "");
-    m.def("get_isolation_side_from_index", &get_isolation_side_from_index, "");
-    m.def("calculate_core_maximum_magnetic_energy", &calculate_core_maximum_magnetic_energy, "");
-    m.def("calculate_saturation_current", &calculate_saturation_current, "");
-    m.def("calculate_temperature_from_core_thermal_resistance", &calculate_temperature_from_core_thermal_resistance, "");
-    m.def("get_coating", &get_coating, "");
-    m.def("load_databases", &load_databases, "");
-    m.def("read_databases", &read_databases, "");
-    m.def("load_mas", &load_mas, "");
-    m.def("load_magnetic", &load_magnetic, "");
-    m.def("load_magnetics", &load_magnetics, "");
-    // m.def("load_magnetics_from_file", &load_magnetics_from_file, "");
-    m.def("read_mas", &read_mas, "");
-    m.def("mas_autocomplete", &mas_autocomplete, "");
-    m.def("magnetic_autocomplete", &magnetic_autocomplete, "");
-    m.def("calculate_steinmetz_coefficients", &calculate_steinmetz_coefficients, "");
-    m.def("calculate_steinmetz_coefficients_with_error", &calculate_steinmetz_coefficients_with_error, "");
+    m.doc() = "Python wrapper for MKF (Magnetics Knowledge Foundation) - the simulation engine of OpenMagnetics";
 
-    m.def("clear_magnetic_cache", &clear_magnetic_cache, "");
+    // Constants and defaults
+    m.def("get_constants", &get_constants, "Retrieve physical and simulation constants used in OpenMagnetics");
+    m.def("get_defaults", &get_defaults, "Retrieve default model configurations and parameters");
+
+    // Core materials
+    m.def("get_core_materials", &get_core_materials, "Retrieve all available core materials as JSON objects");
+    m.def("get_material_permeability", &get_material_permeability, 
+        "Calculate initial permeability for a material at given temperature, DC bias, and frequency",
+        py::arg("material_name"), py::arg("temperature"), py::arg("magnetic_field_dc_bias"), py::arg("frequency"));
+    m.def("get_material_resistivity", &get_material_resistivity,
+        "Calculate resistivity for a material at given temperature",
+        py::arg("material_name"), py::arg("temperature"));
+    m.def("get_core_material_steinmetz_coefficients", &get_core_material_steinmetz_coefficients,
+        "Retrieve Steinmetz coefficients for core loss calculation at given frequency",
+        py::arg("material_name"), py::arg("frequency"));
+
+    // Core shapes
+    m.def("get_core_shapes", &get_core_shapes, "Retrieve all available core shapes as JSON objects");
+    m.def("get_core_shape_families", &get_core_shape_families, "Retrieve list of unique core shape families");
+
+    // Wires, bobbins, and materials
+    m.def("get_wires", &get_wires, "Retrieve all available wires as JSON objects");
+    m.def("get_bobbins", &get_bobbins, "Retrieve all available bobbins as JSON objects");
+    m.def("get_insulation_materials", &get_insulation_materials, "Retrieve all available insulation materials");
+    m.def("get_wire_materials", &get_wire_materials, "Retrieve all available wire materials");
+
+    // Name retrieval functions
+    m.def("get_core_material_names", &get_core_material_names, "Retrieve list of all core material names");
+    m.def("get_core_material_names_by_manufacturer", &get_core_material_names_by_manufacturer,
+        "Retrieve core material names filtered by manufacturer",
+        py::arg("manufacturer_name"));
+    m.def("get_core_shape_names", &get_core_shape_names,
+        "Retrieve list of core shape names",
+        py::arg("include_toroidal"));
+    m.def("get_wire_names", &get_wire_names, "Retrieve list of all wire names");
+    m.def("get_bobbin_names", &get_bobbin_names, "Retrieve list of all bobbin names");
+    m.def("get_insulation_material_names", &get_insulation_material_names, "Retrieve list of all insulation material names");
+    m.def("get_wire_material_names", &get_wire_material_names, "Retrieve list of all wire material names");
+
+    // Lookup functions
+    m.def("find_core_material_by_name", &find_core_material_by_name, "Find core material data by name");
+    m.def("find_core_shape_by_name", &find_core_shape_by_name, "Find core shape data by name");
+    m.def("find_wire_by_name", &find_wire_by_name, "Find wire data by name");
+    m.def("find_bobbin_by_name", &find_bobbin_by_name, "Find bobbin data by name");
+    m.def("find_insulation_material_by_name", &find_insulation_material_by_name, "Find insulation material data by name");
+    m.def("find_wire_material_by_name", &find_wire_material_by_name, "Find wire material data by name");
+    m.def("find_wire_by_dimension", &find_wire_by_dimension, "Find wire by dimension, type, and standard");
+
+    // Bobbin creation
+    m.def("create_basic_bobbin", &create_basic_bobbin, "Create a basic bobbin from core data");
+    m.def("create_basic_bobbin_by_thickness", &create_basic_bobbin_by_thickness, "Create a basic bobbin with specified thickness");
+
+    // Core calculations
+    m.def("calculate_core_data", &calculate_core_data, "Process core data and return complete description");
+    m.def("calculate_core_processed_description", &calculate_core_processed_description, "Calculate processed description for a core");
+    m.def("calculate_core_geometrical_description", &calculate_core_geometrical_description, "Calculate geometrical description for a core");
+    m.def("calculate_core_gapping", &calculate_core_gapping, "Calculate gapping configuration for a core");
+
+    // Winding
+    m.def("wind", &wind, "Wind coils on a magnetic core according to specifications");
+    m.def("get_default_models", &get_default_models, "Retrieve default physical models configuration");
+
+    // Inductance and losses
+    m.def("calculate_inductance_from_number_turns_and_gapping", &calculate_inductance_from_number_turns_and_gapping,
+        "Calculate inductance from turns count and gap configuration");
+    m.def("calculate_core_losses", &calculate_core_losses, "Calculate core losses for given operating conditions");
+    m.def("calculate_advised_cores", &calculate_advised_cores, "Get recommended cores for design requirements");
+    m.def("calculate_advised_magnetics", &calculate_advised_magnetics, "Get recommended magnetic designs for requirements");
+    m.def("calculate_winding_losses", &calculate_winding_losses, "Calculate total winding losses");
+    m.def("calculate_ohmic_losses", &calculate_ohmic_losses, "Calculate DC ohmic losses in windings");
+    m.def("calculate_magnetic_field_strength_field", &calculate_magnetic_field_strength_field, "Calculate magnetic field strength distribution");
+    m.def("calculate_proximity_effect_losses", &calculate_proximity_effect_losses, "Calculate proximity effect losses in windings");
+    m.def("calculate_skin_effect_losses", &calculate_skin_effect_losses, "Calculate skin effect losses in windings");
+    m.def("calculate_skin_effect_losses_per_meter", &calculate_skin_effect_losses_per_meter, "Calculate skin effect losses per meter of wire");
+
+    // Plotting functions
+    m.def("plot_core", &plot_core, "Generate SVG plot of core geometry");
+    m.def("plot_sections", &plot_sections, "Generate SVG plot of winding sections");
+    m.def("plot_layers", &plot_layers, "Generate SVG plot of winding layers");
+    m.def("plot_turns", &plot_turns, "Generate SVG plot of individual turns");
+    m.def("plot_field", &plot_field, "Generate SVG plot of magnetic field");
+    m.def("plot_wire", &plot_wire, "Generate SVG plot of wire cross-section");
+    m.def("plot_current_density", &plot_current_density, "Generate SVG plot of current density distribution");
+
+    // Settings
+    m.def("set_settings", &set_settings, "Configure simulation settings");
+    m.def("get_settings", &get_settings, "Retrieve current simulation settings");
+    m.def("reset_settings", &reset_settings, "Reset settings to defaults");
+
+    // Signal processing
+    m.def("calculate_harmonics", &calculate_harmonics, "Calculate harmonic components of a waveform");
+    m.def("calculate_signal_from_harmonics", &calculate_signal_from_harmonics, "Reconstruct signal from harmonic components");
+    m.def("calculate_processed", &calculate_processed, "Process raw signal data");
+
+    // Bobbin processing
+    m.def("calculate_bobbin_data", &calculate_bobbin_data, "Calculate bobbin specifications");
+    m.def("process_bobbin", &process_bobbin, "Process bobbin geometry");
+
+    // Wire data functions
+    m.def("get_wire_data", &get_wire_data, "Get complete wire data from specification");
+    m.def("get_wire_data_by_name", &get_wire_data_by_name, "Get wire data by name");
+    m.def("get_wire_data_by_standard_name", &get_wire_data_by_standard_name, "Get wire data by standard designation");
+    m.def("get_strand_by_standard_name", &get_strand_by_standard_name, "Get strand data by standard designation");
+    m.def("get_wire_outer_width_rectangular", &get_wire_outer_width_rectangular, "Get outer width of rectangular wire");
+    m.def("get_wire_outer_height_rectangular", &get_wire_outer_height_rectangular, "Get outer height of rectangular wire");
+    m.def("get_wire_outer_diameter_bare_litz", &get_wire_outer_diameter_bare_litz, "Get outer diameter of bare litz wire");
+    m.def("get_wire_outer_diameter_served_litz", &get_wire_outer_diameter_served_litz, "Get outer diameter of served litz wire");
+    m.def("get_wire_outer_diameter_insulated_litz", &get_wire_outer_diameter_insulated_litz, "Get outer diameter of insulated litz wire");
+    m.def("get_wire_outer_diameter_enamelled_round", &get_wire_outer_diameter_enamelled_round, "Get outer diameter of enamelled round wire");
+    m.def("get_wire_outer_diameter_insulated_round", &get_wire_outer_diameter_insulated_round, "Get outer diameter of insulated round wire");
+    m.def("get_wire_conducting_diameter_by_standard_name", &get_wire_conducting_diameter_by_standard_name, "Get conducting diameter by standard name");
+    m.def("get_outer_dimensions", &get_outer_dimensions, "Get outer dimensions of a wire");
+    m.def("get_equivalent_wire", &get_equivalent_wire, "Get equivalent wire for comparison");
+    m.def("get_coating_label", &get_coating_label, "Get coating label for a wire");
+    m.def("get_wire_coating_by_label", &get_wire_coating_by_label, "Get wire coating data by label");
+    m.def("get_coating_labels_by_type", &get_coating_labels_by_type, "Get available coating labels by type");
+
+    // Database and material loading
+    m.def("load_core_data", &load_core_data, "Load core data from JSON");
+    m.def("get_material_data", &get_material_data, "Get material data by name");
+    m.def("get_core_temperature_dependant_parameters", &get_core_temperature_dependant_parameters, "Get temperature-dependent core parameters");
+    m.def("calculate_shape_data", &calculate_shape_data, "Calculate shape parameters");
+    m.def("get_shape_data", &get_shape_data, "Get shape data by name");
+
+    // Availability queries
+    m.def("get_available_shape_families", &get_available_shape_families, "Get list of available shape families");
+    m.def("get_available_core_materials", &get_available_core_materials, "Get list of available core materials");
+    m.def("get_available_core_manufacturers", &get_available_core_manufacturers, "Get list of core manufacturers");
+    m.def("get_available_core_shape_families", &get_available_core_shape_families, "Get list of available core shape families");
+    m.def("get_available_core_shapes", &get_available_core_shapes, "Get list of available core shapes");
+    m.def("get_available_cores", &get_available_cores, "Get list of all available cores");
+    m.def("get_available_wires", &get_available_wires, "Get list of all available wires");
+    m.def("get_unique_wire_diameters", &get_unique_wire_diameters, "Get list of unique wire diameters");
+    m.def("get_available_wire_types", &get_available_wire_types, "Get list of available wire types");
+    m.def("get_available_wire_standards", &get_available_wire_standards, "Get list of available wire standards");
+    m.def("calculate_gap_reluctance", &calculate_gap_reluctance, "Calculate magnetic reluctance of an air gap");
+    m.def("get_gap_reluctance_model_information", &get_gap_reluctance_model_information, "Get information about gap reluctance models");
+    m.def("calculate_number_turns_from_gapping_and_inductance", &calculate_number_turns_from_gapping_and_inductance,
+        "Calculate required number of turns from gap and target inductance");
+    m.def("calculate_gapping_from_number_turns_and_inductance", &calculate_gapping_from_number_turns_and_inductance,
+        "Calculate required gap from turns count and target inductance");
+    m.def("get_core_losses_model_information", &get_core_losses_model_information, "Get information about available core loss models");
+    m.def("get_core_temperature_model_information", &get_core_temperature_model_information, "Get information about core temperature models");
+    m.def("resolve_dimension_with_tolerance", &resolve_dimension_with_tolerance, "Resolve dimension value from tolerance specification");
+    m.def("calculate_induced_voltage", &calculate_induced_voltage, "Calculate induced voltage in a winding");
+    m.def("calculate_induced_current", &calculate_induced_current, "Calculate induced current in a winding");
+    m.def("calculate_reflected_secondary", &calculate_reflected_secondary, "Calculate secondary-side reflected values");
+    m.def("calculate_reflected_primary", &calculate_reflected_primary, "Calculate primary-side reflected values");
+    m.def("calculate_instantaneous_power", &calculate_instantaneous_power, "Calculate instantaneous power");
+    m.def("calculate_rms_power", &calculate_rms_power, "Calculate RMS power");
+    m.def("calculate_basic_processed_data", &calculate_basic_processed_data, "Process basic signal data");
+    m.def("create_waveform", &create_waveform, "Create a waveform from parameters");
+    m.def("scale_waveform_time_to_frequency", &scale_waveform_time_to_frequency, "Scale waveform time base to frequency");
+    m.def("calculate_insulation", &calculate_insulation, "Calculate insulation requirements");
+    m.def("extract_operating_point", &extract_operating_point, "Extract operating point from inputs");
+    m.def("extract_map_column_names", &extract_map_column_names, "Extract column names from map data");
+    m.def("extract_column_names", &extract_column_names, "Extract column names from data");
+    m.def("calculate_number_turns", &calculate_number_turns, "Calculate optimal number of turns");
+    m.def("calculate_dc_resistance_per_meter", &calculate_dc_resistance_per_meter, "Calculate DC resistance per meter of wire");
+    m.def("calculate_dc_losses_per_meter", &calculate_dc_losses_per_meter, "Calculate DC losses per meter of wire");
+    m.def("calculate_skin_ac_losses_per_meter", &calculate_skin_ac_losses_per_meter, "Calculate AC skin losses per meter");
+    m.def("calculate_skin_ac_factor", &calculate_skin_ac_factor, "Calculate skin effect AC factor");
+    m.def("calculate_skin_ac_resistance_per_meter", &calculate_skin_ac_resistance_per_meter, "Calculate AC resistance per meter due to skin effect");
+    m.def("calculate_effective_current_density", &calculate_effective_current_density, "Calculate effective current density in wire");
+    m.def("calculate_effective_skin_depth", &calculate_effective_skin_depth, "Calculate effective skin depth");
+    m.def("get_available_winding_orientations", &get_available_winding_orientations, "Get list of available winding orientations");
+    m.def("get_available_coil_alignments", &get_available_coil_alignments, "Get list of available coil alignments");
+    m.def("check_requirement", &check_requirement, "Check if a design requirement is met");
+    m.def("wind_planar", &wind_planar, "Wind planar coils");
+    m.def("wind_by_sections", &wind_by_sections, "Wind coil organized by sections");
+    m.def("wind_by_layers", &wind_by_layers, "Wind coil organized by layers");
+    m.def("wind_by_turns", &wind_by_turns, "Wind coil turn by turn");
+    m.def("delimit_and_compact", &delimit_and_compact, "Delimit and compact winding layout");
+    m.def("get_layers_by_winding_index", &get_layers_by_winding_index, "Get layers for a specific winding index");
+    m.def("get_layers_by_section", &get_layers_by_section, "Get layers within a section");
+    m.def("get_sections_description_conduction", &get_sections_description_conduction, "Get conduction description for sections");
+    m.def("simulate", &simulate, "Run magnetic simulation");
+    m.def("are_sections_and_layers_fitting", &are_sections_and_layers_fitting, "Check if sections and layers fit in window");
+    m.def("add_margin_to_section_by_index", &add_margin_to_section_by_index, "Add margin to a section by index");
+    m.def("check_if_fits", &check_if_fits, "Check if winding fits in available space");
+    m.def("get_coating_thickness", &get_coating_thickness, "Get thickness of wire coating");
+    m.def("get_coating_relative_permittivity", &get_coating_relative_permittivity, "Get relative permittivity of coating");
+    m.def("get_coating_insulation_material", &get_coating_insulation_material, "Get insulation material of coating");
+    m.def("get_insulation_layer_insulation_material", &get_insulation_layer_insulation_material, "Get insulation material for layer insulation");
+    m.def("export_magnetic_as_subcircuit", &export_magnetic_as_subcircuit, "Export magnetic as SPICE subcircuit");
+    m.def("process_inputs", &process_inputs, "Process and validate inputs");
+    m.def("load_core_materials", &load_core_materials, "Load core materials into database");
+    m.def("load_core_shapes", &load_core_shapes, "Load core shapes into database");
+    m.def("load_wires", &load_wires, "Load wires into database");
+    m.def("clear_databases", &clear_databases, "Clear all loaded databases");
+    m.def("is_core_material_database_empty", &is_core_material_database_empty, "Check if core material database is empty");
+    m.def("is_core_shape_database_empty", &is_core_shape_database_empty, "Check if core shape database is empty");
+    m.def("is_wire_database_empty", &is_wire_database_empty, "Check if wire database is empty");
+    m.def("get_isolation_side_from_index", &get_isolation_side_from_index, "Get isolation side from winding index");
+    m.def("calculate_core_maximum_magnetic_energy", &calculate_core_maximum_magnetic_energy, "Calculate maximum magnetic energy in core");
+    m.def("calculate_saturation_current", &calculate_saturation_current, "Calculate saturation current");
+    m.def("calculate_temperature_from_core_thermal_resistance", &calculate_temperature_from_core_thermal_resistance, 
+        "Calculate temperature rise from thermal resistance");
+    m.def("get_coating", &get_coating, "Get coating data for a wire");
+    m.def("load_databases", &load_databases, "Load all databases from JSON");
+    m.def("read_databases", &read_databases, "Read databases from file path");
+    m.def("load_mas", &load_mas, "Load a MAS (Magnetic Agnostic Structure) object");
+    m.def("load_magnetic", &load_magnetic, "Load a magnetic component");
+    m.def("load_magnetics", &load_magnetics, "Load multiple magnetic components");
+    // m.def("load_magnetics_from_file", &load_magnetics_from_file, "");
+    m.def("read_mas", &read_mas, "Read a MAS object by key");
+    m.def("mas_autocomplete", &mas_autocomplete, "Autocomplete missing fields in MAS object");
+    m.def("magnetic_autocomplete", &magnetic_autocomplete, "Autocomplete missing fields in magnetic component");
+    m.def("calculate_steinmetz_coefficients", &calculate_steinmetz_coefficients, "Calculate Steinmetz coefficients from loss data");
+    m.def("calculate_steinmetz_coefficients_with_error", &calculate_steinmetz_coefficients_with_error,
+        "Calculate Steinmetz coefficients with error estimation");
+
+    m.def("clear_magnetic_cache", &clear_magnetic_cache, "Clear cached magnetic calculations");
     // m.def("load_magnetic", &load_magnetic, "");
     // m.def("load_magnetics", &load_magnetics, "");
-    m.def("load_magnetics_from_file", &load_magnetics_from_file, "");
-    m.def("calculate_advised_magnetics_from_catalog", &calculate_advised_magnetics_from_catalog, "");
-    m.def("calculate_advised_magnetics_from_cache", &calculate_advised_magnetics_from_cache, "");
+    m.def("load_magnetics_from_file", &load_magnetics_from_file, "Load magnetic components from file");
+    m.def("calculate_advised_magnetics_from_catalog", &calculate_advised_magnetics_from_catalog, 
+        "Get recommended magnetics from component catalog");
+    m.def("calculate_advised_magnetics_from_cache", &calculate_advised_magnetics_from_cache,
+        "Get recommended magnetics from cached designs");
 }

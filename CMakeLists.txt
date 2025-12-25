@@ -86,15 +86,15 @@ include_directories("${CMAKE_BINARY_DIR}/_deps/svg-src/src")
 
 message(STATUS "Fetching magic-enum")
 FetchContent_Declare(magic-enum
-    GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
-    GIT_TAG  tags/v0.9.3)
+    GIT_REPOSITORY https://github.com/Neargye/magic_enum
+    GIT_TAG  tags/v0.9.6)
 FetchContent_MakeAvailable(magic-enum)
-include_directories("${CMAKE_BINARY_DIR}/_deps/magic-enum-src/include")
+include_directories("${CMAKE_BINARY_DIR}/_deps/magic-enum-src/include/magic_enum")
 
 message(STATUS "Fetching matplotplusplus")
 FetchContent_Declare(matplotplusplus
     GIT_REPOSITORY https://github.com/alandefreitas/matplotplusplus.git
-    GIT_TAG origin/master) # or whatever tag you want
+    GIT_TAG tags/v1.2.1)
 FetchContent_GetProperties(matplotplusplus)
 if(NOT matplotplusplus_POPULATED)
     FetchContent_Populate(matplotplusplus)
@@ -110,11 +110,6 @@ message(STATUS "Fetching MKF")
 FetchContent_Declare(MKF
         GIT_REPOSITORY https://github.com/OpenMagnetics/MKF.git
         GIT_TAG main)
-
-message(STATUS "Fetching magic-enum")
-FetchContent_Declare(magic-enum
-        GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
-        GIT_TAG  tags/v0.9.3)
 
 message(STATUS "Fetching mas")
 FetchContent_Declare(
@@ -191,8 +186,8 @@ add_custom_target(PyMASGeneration
                   /bin/echo "RUNNING PyMASGeneration"
                   DEPENDS "${MAS_DIRECTORY}/MAS.hpp")
 
-message(STATUS "Compiling PyMKF")
-file(GLOB SOURCES PyMKF.cpp 
+message(STATUS "Compiling PyMKF with modular structure")
+file(GLOB SOURCES src/*.cpp 
     ${CMAKE_BINARY_DIR}/_deps/mkf-src/src/*.cpp
     ${CMAKE_BINARY_DIR}/_deps/mkf-src/src/advisers/*.cpp
     ${CMAKE_BINARY_DIR}/_deps/mkf-src/src/constructive_models/*.cpp
@@ -206,8 +201,6 @@ message(STATUS ${SOURCES})
 pybind11_add_module(PyMKF ${SOURCES})
 
 add_dependencies(PyMKF PyMASGeneration)
-
-FetchContent_MakeAvailable(magic-enum)
 
 target_link_libraries(PyMKF PUBLIC nlohmann_json::nlohmann_json matplot levmar rapidfuzz::rapidfuzz)
 
@@ -236,6 +229,7 @@ include_directories("${CMAKE_BINARY_DIR}/_deps/json-src/include/")
 include_directories("${CMAKE_BINARY_DIR}/_deps/mkf-src/src/")
 include_directories("${CMAKE_BINARY_DIR}/_cmrc/include")
 include_directories("${MAS_DIRECTORY}")
+include_directories("src/")
 
 # target_link_libraries(PyMKF PUBLIC MKF)
 
