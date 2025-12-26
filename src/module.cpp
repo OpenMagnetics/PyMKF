@@ -11,8 +11,8 @@
 #include "settings.h"
 #include "utils.h"
 
-PYBIND11_MODULE(PyMKF, m) {
-    m.doc() = "OpenMagnetics PyMKF bindings";
+PYBIND11_MODULE(PyOpenMagnetics, m) {
+    m.doc() = "OpenMagnetics Python bindings for magnetic component design";
 
     // Register all module bindings
     PyMKF::register_database_bindings(m);
