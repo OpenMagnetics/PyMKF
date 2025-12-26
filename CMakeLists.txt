@@ -186,7 +186,7 @@ add_custom_target(PyMASGeneration
                   /bin/echo "RUNNING PyMASGeneration"
                   DEPENDS "${MAS_DIRECTORY}/MAS.hpp")
 
-message(STATUS "Compiling PyMKF with modular structure")
+message(STATUS "Compiling PyOpenMagnetics with modular structure")
 file(GLOB SOURCES src/*.cpp 
     ${CMAKE_BINARY_DIR}/_deps/mkf-src/src/*.cpp
     ${CMAKE_BINARY_DIR}/_deps/mkf-src/src/advisers/*.cpp
@@ -198,11 +198,11 @@ file(GLOB SOURCES src/*.cpp
     )
 message(STATUS SOURCES)
 message(STATUS ${SOURCES})
-pybind11_add_module(PyMKF ${SOURCES})
+pybind11_add_module(PyOpenMagnetics ${SOURCES})
 
-add_dependencies(PyMKF PyMASGeneration)
+add_dependencies(PyOpenMagnetics PyMASGeneration)
 
-target_link_libraries(PyMKF PUBLIC nlohmann_json::nlohmann_json matplot levmar rapidfuzz::rapidfuzz)
+target_link_libraries(PyOpenMagnetics PUBLIC nlohmann_json::nlohmann_json matplot levmar rapidfuzz::rapidfuzz)
 
 file(DOWNLOAD "https://raw.githubusercontent.com/vector-of-bool/cmrc/master/CMakeRC.cmake"
                  "${CMAKE_BINARY_DIR}/CMakeRC.cmake")
@@ -211,11 +211,11 @@ include("${CMAKE_BINARY_DIR}/CMakeRC.cmake")
 include_directories("${CMAKE_BINARY_DIR}/_deps/mkf-src/")
 
 cmrc_add_resource_library(insulation_standards ALIAS data::insulation_standards NAMESPACE insulationData WHENCE ${MKF_DIR}/ ${MKF_DIR}/src/data/insulation_standards/IEC_60664-1.json ${MKF_DIR}/src/data/insulation_standards/IEC_60664-4.json ${MKF_DIR}/src/data/insulation_standards/IEC_60664-5.json ${MKF_DIR}/src/data/insulation_standards/IEC_62368-1.json ${MKF_DIR}/src/data/insulation_standards/IEC_61558-1.json ${MKF_DIR}/src/data/insulation_standards/IEC_61558-2-16.json ${MKF_DIR}/src/data/insulation_standards/IEC_60335-1.json)
-target_link_libraries(PyMKF PUBLIC data::insulation_standards)
+target_link_libraries(PyOpenMagnetics PUBLIC data::insulation_standards)
 
 
 cmrc_add_resource_library(data ALIAS data::data NAMESPACE data WHENCE ${MAS_DIR} PREFIX MAS ${MAS_DIR}/data/core_materials.ndjson ${MAS_DIR}/data/core_shapes.ndjson ${MAS_DIR}/data/cores.ndjson ${MAS_DIR}/data/bobbins.ndjson ${MAS_DIR}/data/insulation_materials.ndjson ${MAS_DIR}/data/wire_materials.ndjson ${MAS_DIR}/data/wires.ndjson)
-target_link_libraries(PyMKF PUBLIC data::data)
+target_link_libraries(PyOpenMagnetics PUBLIC data::data)
 
 
 include_directories("${CMAKE_BINARY_DIR}/_deps/json-src/include/nlohmann/")
@@ -231,8 +231,8 @@ include_directories("${CMAKE_BINARY_DIR}/_cmrc/include")
 include_directories("${MAS_DIRECTORY}")
 include_directories("src/")
 
-# target_link_libraries(PyMKF PUBLIC MKF)
+# target_link_libraries(PyOpenMagnetics PUBLIC MKF)
 
 
 
-install(TARGETS PyMKF LIBRARY DESTINATION .)
+install(TARGETS PyOpenMagnetics LIBRARY DESTINATION .)

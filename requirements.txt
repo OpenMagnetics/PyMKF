@@ -1,5 +1,5 @@
 sqlalchemy
-pymkf
+PyOpenMagnetics
 pandas
 pipx
 psycopg2-binary
